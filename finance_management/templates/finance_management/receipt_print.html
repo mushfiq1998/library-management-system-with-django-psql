@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt #{{ payment.receipt_number }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-width: 80mm;
+            margin: 0 auto;
+        }
+
+        @media screen and (max-width: 600px) {
+            body {
+                max-width: 100%;
+                padding: 5px;
+            }
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .receipt-body {
+            margin-bottom: 20px;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 10px;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+
+        .amount {
+            float: right;
+        }
+
+        table {
+            width: 100%;
+            margin: 10px 0;
+            table-layout: fixed;
+        }
+
+        td {
+            padding: 3px 0;
+            word-wrap: break-word;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                width: 80mm;
+                margin: 0;
+                padding: 10px;
+            }
+            @page {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-header">
+        <h2>{{ library_name }}</h2>
+        <p>{{ library_address }}</p>
+        <p>{{ library_contact }}</p>
+        <div class="divider"></div>
+    </div>
+
+    <div class="receipt-body">
+        <table>
+            <tr>
+                <td>Receipt No:</td>
+                <td>{{ payment.receipt_number }}</td>
+            </tr>
+            <tr>
+                <td>Date:</td>
+                <td>{{ payment.payment_date|date:"Y-m-d H:i" }}</td>
+            </tr>
+            <tr>
+                <td>Payer:</td>
+                <td>{{ payment.payer.username }}</td>
+            </tr>
+            <tr>
+                <td>Transaction ID:</td>
+                <td>{{ payment.transaction.transaction_id }}</td>
+            </tr>
+        </table>
+
+        <div class="divider"></div>
+
+        <table>
+            <tr>
+                <td>Payment Type:</td>
+                <td>{{ payment.transaction.category }}</td>
+            </tr>
+            <tr>
+                <td>Method:</td>
+                <td>{{ payment.transaction.payment_method }}</td>
+            </tr>
+            <tr>
+                <td><strong>Amount:</strong></td>
+                <td><strong>${{ payment.transaction.amount|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+
+        <div class="divider"></div>
+
+        <p class="text-center">
+            <strong>Description:</strong><br>
+            {{ payment.transaction.description }}
+        </p>
+    </div>
+
+    <div class="receipt-footer">
+        <div class="divider"></div>
+        <p>Thank you for your payment!</p>
+        <p>This is a computer generated receipt.</p>
+        <p>{{ payment.payment_date|date:"Y-m-d H:i" }}</p>
+    </div>
+
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

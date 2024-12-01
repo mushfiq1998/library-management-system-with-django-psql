@@ -1,0 +1,200 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Inventory Detail{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0">
+    <div class="card-header bg-gradient-primary text-white d-flex flex-wrap justify-content-between align-items-center py-3">
+        <div class="d-flex align-items-center gap-3 mb-2 mb-sm-0">
+            <a href="{% url 'inventory:inventory_list' %}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Inventory
+            </a>
+            <h2 class="mb-0 fs-4 fs-sm-3">
+                <i class="fas fa-box me-2"></i>{{ inventory_item.book.title }}
+            </h2>
+        </div>
+    </div>
+
+    <div class="card-body p-3 p-md-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0 fs-5"><i class="fas fa-info-circle me-2"></i>Inventory Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                <span class="me-2">Total Copies</span>
+                                <span class="badge bg-primary rounded-pill">{{ inventory_item.total_copies }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                <span class="me-2">Available Copies</span>
+                                <span class="badge bg-success rounded-pill">{{ inventory_item.available_copies }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                <span class="me-2">Minimum Threshold</span>
+                                <span class="badge bg-warning text-dark rounded-pill">{{ inventory_item.minimum_threshold }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                <span class="me-2">Last Updated</span>
+                                <span class="text-muted">{{ inventory_item.last_inventory_date|date:"F d, Y H:i" }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 fs-5"><i class="fas fa-exclamation-triangle me-2"></i>Damaged Books</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if damaged_books %}
+                            <div class="list-group">
+                                {% for damaged in damaged_books %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex flex-wrap w-100 justify-content-between gap-2">
+                                            <h6 class="mb-1">Damage Report #{{ damaged.id }}</h6>
+                                            <small class="text-muted">{{ damaged.damage_date|date:"F d, Y" }}</small>
+                                        </div>
+                                        <p class="mb-1">{{ damaged.damage_description }}</p>
+                                        <small class="text-muted">Status: 
+                                            <span class="badge bg-{{ damaged.status|lower }}">
+                                                {{ damaged.get_status_display }}
+                                            </span>
+                                        </small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No damaged books reported.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 fs-5"><i class="fas fa-history me-2"></i>Inventory History</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if logs %}
+                            <div class="timeline">
+                                {% for log in logs %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="timeline-title d-flex flex-wrap gap-2 align-items-center">
+                                                <span>{{ log.get_action_display }}</span>
+                                                <span class="badge bg-info">{{ log.quantity }}</span>
+                                            </h6>
+                                            <p class="timeline-text">{{ log.notes }}</p>
+                                            <p class="timeline-info">
+                                                <small class="text-muted">
+                                                    By {{ log.performed_by.username }} on 
+                                                    {{ log.date|date:"F d, Y H:i" }}
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No inventory history available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #4e73df;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 3px #4e73df;
+}
+
+.timeline-content {
+    position: relative;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.timeline-title {
+    margin-bottom: 5px;
+}
+
+.timeline-text {
+    margin-bottom: 5px;
+    word-break: break-word;
+}
+
+.timeline-info {
+    margin-bottom: 0;
+}
+
+.bg-damaged {
+    background-color: #e74a3b;
+    color: white;
+}
+
+.bg-repairing {
+    background-color: #f6c23e;
+    color: #333;
+}
+
+.bg-repaired {
+    background-color: #1cc88a;
+    color: white;
+}
+
+.bg-discarded {
+    background-color: #858796;
+    color: white;
+}
+
+@media (max-width: 576px) {
+    .card-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .timeline-item {
+        padding-left: 30px;
+    }
+    
+    .timeline-marker {
+        width: 12px;
+        height: 12px;
+    }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,175 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Membership Plans{% endblock %}
+
+{% block content %}
+<div class="container-fluid container-lg mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Membership Plans</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="row align-items-center">
+                <div class="col-12 col-sm-6 mb-2 mb-sm-0">
+                    <h3 class="mb-0 fs-4">
+                        <i class="fas fa-list-alt me-2"></i>Membership Plans
+                    </h3>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="d-flex flex-wrap justify-content-start justify-content-sm-end gap-2">
+                        <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm w-100 w-sm-auto">
+                            <i class="fas fa-arrow-left me-2"></i>Dashboard
+                        </a>
+                        <a href="{% url 'membership:membership_plan_create' %}" class="btn btn-light btn-sm w-100 w-sm-auto">
+                            <i class="fas fa-plus me-2"></i>Create Plan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0 p-sm-3">
+            {% if plans %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-nowrap">Name</th>
+                            <th scope="col" class="d-none d-md-table-cell text-nowrap">Duration</th>
+                            <th scope="col" class="text-nowrap">Price</th>
+                            <th scope="col" class="d-none d-lg-table-cell text-nowrap">Members</th>
+                            <th scope="col" class="text-center text-nowrap">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in plans %}
+                        <tr>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-break">{{ plan.name }}</span>
+                                    <div class="d-md-none small text-muted mt-1">
+                                        {{ plan.get_duration_display }}
+                                    </div>
+                                    <div class="d-lg-none small text-muted">
+                                        {{ plan.active_members_count }} members
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                <span class="badge bg-info">{{ plan.get_duration_display }}</span>
+                            </td>
+                            <td>
+                                <span class="text-success fw-bold">${{ plan.price }}</span>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                <span class="badge bg-secondary">{{ plan.active_members_count }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-info" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#viewModal{{ plan.id }}">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="d-none d-md-inline ms-1">View</span>
+                                        </button>
+                                        
+                                        <a href="{% url 'membership:membership_plan_edit' plan.pk %}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                            <span class="d-none d-md-inline ms-1">Edit</span>
+                                        </a>
+                                        
+                                        <button type="button" class="btn btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ plan.id }}">
+                                            <i class="fas fa-trash"></i>
+                                            <span class="d-none d-md-inline ms-1">Delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- View Modal -->
+                        <div class="modal fade" id="viewModal{{ plan.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title fs-6">
+                                            <i class="fas fa-info-circle me-2"></i>Plan Details
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-5 col-lg-4">Name:</dt>
+                                            <dd class="col-sm-7 col-lg-8 mb-2 text-break">{{ plan.name }}</dd>
+                                            
+                                            <dt class="col-sm-5 col-lg-4">Duration:</dt>
+                                            <dd class="col-sm-7 col-lg-8 mb-2">{{ plan.get_duration_display }}</dd>
+                                            
+                                            <dt class="col-sm-5 col-lg-4">Price:</dt>
+                                            <dd class="col-sm-7 col-lg-8 mb-2 text-success fw-bold">${{ plan.price }}</dd>
+                                            
+                                            <dt class="col-sm-5 col-lg-4">Members:</dt>
+                                            <dd class="col-sm-7 col-lg-8 mb-0">{{ plan.active_members_count }}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteModal{{ plan.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title fs-6">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>Delete Plan
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="mb-2">Delete plan <strong class="text-break">{{ plan.name }}</strong>?</p>
+                                        {% if plan.active_members_count > 0 %}
+                                        <div class="alert alert-warning py-2 mb-0">
+                                            <small>
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                This plan has {{ plan.active_members_count }} active member{{ plan.active_members_count|pluralize }}
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer pt-2">
+                                        <form action="{% url 'membership:membership_plan_delete' plan.pk %}" method="post" class="d-flex gap-2 w-100">
+                                            {% csrf_token %}
+                                            <button type="button" class="btn btn-sm btn-secondary flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-sm btn-danger flex-grow-1">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info m-3">
+                <i class="fas fa-info-circle me-2"></i>No membership plans found.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

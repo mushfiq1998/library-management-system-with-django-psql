@@ -1,0 +1,240 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Staff Member Details{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0">
+    <div class="card-header bg-gradient-primary text-white d-flex flex-column flex-sm-row justify-content-between align-items-center py-3">
+        <div class="d-flex align-items-center gap-3 mb-2 mb-sm-0">
+            <a href="{% url 'staff:staff_member_list' %}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Staff List
+            </a>
+            <h2 class="mb-0 fs-4">
+                <i class="fas fa-user me-2"></i>Staff Member Details
+            </h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'staff:staff_member_edit' pk=staff_member.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+            <a href="{% url 'staff:staff_member_delete' pk=staff_member.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i>Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Personal Information -->
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Employee ID</span>
+                                <span class="badge bg-primary">{{ staff_member.employee_id }}</span>
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Full Name</span>
+                                <span>{{ staff_member.user.get_full_name }}</span>
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Email</span>
+                                <span class="text-break">{{ staff_member.user.email }}</span>
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Phone Number</span>
+                                <span>{{ staff_member.phone_number }}</span>
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Emergency Contact</span>
+                                <span>{{ staff_member.emergency_contact }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <span class="fw-bold">Address</span>
+                                <p class="mb-0 mt-2">{{ staff_member.address }}</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Information -->
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Employment Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Department</span>
+                                <span class="badge bg-info">{{ staff_member.department.name }}</span>
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Designation</span>
+                                <span>{{ staff_member.designation }}</span>
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Employment Status</span>
+                                {% if staff_member.employment_status == 'FULL_TIME' %}
+                                    <span class="badge bg-success">Full Time</span>
+                                {% elif staff_member.employment_status == 'PART_TIME' %}
+                                    <span class="badge bg-warning text-dark">Part Time</span>
+                                {% elif staff_member.employment_status == 'CONTRACT' %}
+                                    <span class="badge bg-info">Contract</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Intern</span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Joining Date</span>
+                                <span>{{ staff_member.joining_date|date:"F d, Y" }}</span>
+                            </li>
+                            {% if staff_member.salary %}
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                <span class="fw-bold mb-1 mb-sm-0">Salary</span>
+                                <span>${{ staff_member.salary }}</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Leaves -->
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Recent Leaves</h5>
+                        <a href="{% url 'staff:leave_create' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-2"></i>Apply Leave
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_leaves %}
+                            <div class="list-group">
+                                {% for leave in recent_leaves %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex flex-column flex-sm-row w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ leave.get_leave_type_display }}</h6>
+                                            <small class="text-muted">{{ leave.start_date|date:"M d, Y" }}</small>
+                                        </div>
+                                        <p class="mb-1">{{ leave.reason|truncatechars:100 }}</p>
+                                        <small class="text-muted">Status: 
+                                            <span class="badge bg-{{ leave.status|lower }}">
+                                                {{ leave.get_status_display }}
+                                            </span>
+                                        </small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No recent leave requests.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Attendance -->
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Attendance</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_attendance %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Check In</th>
+                                            <th>Check Out</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for attendance in recent_attendance %}
+                                            <tr>
+                                                <td>{{ attendance.date|date:"M d, Y" }}</td>
+                                                <td>{{ attendance.check_in|time:"H:i" }}</td>
+                                                <td>{{ attendance.check_out|time:"H:i"|default:"-" }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ attendance.status|lower }}">
+                                                        {{ attendance.get_status_display }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No recent attendance records.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.8em;
+}
+
+.bg-pending { background-color: #f6c23e; }
+.bg-approved { background-color: #1cc88a; }
+.bg-rejected { background-color: #e74a3b; }
+.bg-cancelled { background-color: #858796; }
+
+.bg-present { background-color: #1cc88a; }
+.bg-absent { background-color: #e74a3b; }
+.bg-late { background-color: #f6c23e; }
+.bg-half_day { background-color: #36b9cc; }
+
+@media (max-width: 576px) {
+    .card-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+    }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,61 @@
+{% extends 'user_management/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Sidebar -->
+        <div class="col-12 col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#userManagementMenu" aria-expanded="true">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">User Management</h5>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="collapse show" id="userManagementMenu">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user me-2"></i>My Profile
+                        </a>
+                        <a href="{% url 'manage_users' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                        <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-12 col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit User: {{ edited_user.username }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-flex flex-column flex-sm-row gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a href="{% url 'manage_users' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

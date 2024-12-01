@@ -1,0 +1,173 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}{{ action }} Registration{% endblock %}
+
+{% block content %}
+<div class="container py-3 py-md-4">
+    <!-- Navigation Breadcrumb -->
+    <div class="row mb-3">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'event:event_list' %}">Events</a>
+                    </li>
+                    <li class="breadcrumb-item active text-break" aria-current="page">{{ action }} Registration</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="text-break"><i class="fas fa-ticket-alt me-2"></i>{{ action }} Event Registration</h2>
+        </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mb-4 mb-lg-0">
+            <div class="card h-100">
+                <div class="card-body p-3 p-md-4">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- User Selection -->
+                        <div class="mb-3">
+                            <label for="{{ form.user.id_for_label }}" class="form-label">User</label>
+                            {{ form.user }}
+                            {% if form.user.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.user.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Select the user to register for the event</div>
+                        </div>
+
+                        <!-- Event Selection -->
+                        <div class="mb-3">
+                            <label for="{{ form.event.id_for_label }}" class="form-label">Event</label>
+                            {{ form.event }}
+                            {% if form.event.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.event.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Select the event to register for</div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.notes.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Add any special requirements or notes for this registration</div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="mt-4 d-flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Registration
+                            </button>
+                            <a href="{% url 'event:event_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card mt-4 d-lg-none">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle me-2"></i>Registration Information
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Only upcoming events with available spots are shown in the dropdown.</li>
+                        <li>Users can only be registered once for each event.</li>
+                        <li>Registration will fail if the event is full or past its registration deadline.</li>
+                        <li>Notes are optional but can be helpful for special arrangements.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Information -->
+        <div class="col-12 col-lg-4">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Quick Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-check-circle me-2 text-success"></i>Before Registering</h6>
+                        <ul class="small">
+                            <li>Verify user details are correct</li>
+                            <li>Check event capacity and deadline</li>
+                            <li>Confirm any special requirements</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-exclamation-circle me-2 text-warning"></i>Important Notes</h6>
+                        <ul class="small">
+                            <li>Registration is final once submitted</li>
+                            <li>Cancellations must be done separately</li>
+                            <li>Some events may have additional requirements</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Card for larger screens -->
+            <div class="card mt-4 d-none d-lg-block">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle me-2"></i>Registration Information
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Only upcoming events with available spots are shown in the dropdown.</li>
+                        <li>Users can only be registered once for each event.</li>
+                        <li>Registration will fail if the event is full or past its registration deadline.</li>
+                        <li>Notes are optional but can be helpful for special arrangements.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const eventSelect = document.getElementById('{{ form.event.id_for_label }}');
+        
+        eventSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                // You could add AJAX call here to fetch event details
+                // and update the form with additional information
+            }
+        });
+    });
+</script>
+{% endblock %}

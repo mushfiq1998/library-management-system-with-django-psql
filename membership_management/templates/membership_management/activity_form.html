@@ -1,0 +1,151 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}{{ action }} Activity{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'membership:activity_list' %}" class="text-decoration-none">
+                    <i class="fas fa-history me-2"></i>Activities
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ action }} Activity</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                    <h3 class="mb-0 fs-4">
+                        <i class="fas {% if action == 'Create' %}fa-plus-circle{% else %}fa-edit{% endif %} me-2"></i>
+                        {{ action }} Activity
+                    </h3>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Membership Selection -->
+                        <div class="mb-4">
+                            <label for="{{ form.membership.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Member
+                            </label>
+                            {{ form.membership }}
+                            {% if form.membership.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.membership.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                Select the membership to record activity for
+                            </div>
+                        </div>
+
+                        <!-- Activity Type -->
+                        <div class="mb-4">
+                            <label for="{{ form.activity_type.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-tag me-2"></i>Activity Type
+                            </label>
+                            {{ form.activity_type }}
+                            {% if form.activity_type.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.activity_type.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                Select the type of activity being recorded
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-comment me-2"></i>Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                Provide details about the activity
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 d-flex flex-column flex-sm-row justify-content-between gap-2">
+                            <a href="{% url 'membership:activity_list' %}" class="btn btn-secondary w-100 w-sm-auto">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Activities
+                            </a>
+                            <button type="submit" class="btn btn-primary w-100 w-sm-auto">
+                                <i class="fas {% if action == 'Create' %}fa-plus{% else %}fa-save{% endif %} me-2"></i>
+                                {{ action }} Activity
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if action == 'Create' %}
+            <!-- Help Card -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0 fs-5">
+                        <i class="fas fa-info-circle me-2"></i>Activity Recording Guidelines
+                    </h5>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Select Member:</strong> Choose the membership to record activity for
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Activity Type:</strong> Select the appropriate type of activity
+                        </li>
+                        <li class="mb-3 mb-md-0">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Description:</strong> Provide clear and detailed information about the activity
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Add Bootstrap form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}
+{% endblock %}

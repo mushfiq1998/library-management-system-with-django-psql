@@ -1,0 +1,204 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}{{ author.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient-primary text-white">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <h2 class="mb-3 mb-md-0"><i class="fas fa-user-circle me-2"></i>{{ author.name }}</h2>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'author_pdf' pk=author.pk %}" class="btn btn-danger hover-scale" target="_blank">
+                        <i class="fas fa-file-pdf me-2"></i>Print PDF
+                    </a>
+                    {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                    <a href="{% url 'author_edit' pk=author.pk %}" class="btn btn-warning hover-scale">
+                        <i class="fas fa-edit me-2"></i>Edit
+                    </a>
+                    <a href="{% url 'author_delete' pk=author.pk %}" class="btn btn-danger hover-scale">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'author_list' %}" class="btn btn-info hover-scale">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row g-4">
+                <div class="col-12 col-lg-8">
+                    <div class="info-section p-3 p-md-4 bg-white rounded shadow-sm mb-4">
+                        <h3 class="text-primary mb-4 border-bottom pb-2">Author Information</h3>
+                        <dl class="row g-3">
+                            <dt class="col-12 col-sm-3 text-muted"><i class="fas fa-birthday-cake me-2"></i>Birth Date</dt>
+                            <dd class="col-12 col-sm-9 mb-0">{{ author.birth_date|default:"Unknown" }}</dd>
+
+                            <dt class="col-12 col-sm-3 text-muted"><i class="fas fa-star me-2"></i>Death Date</dt>
+                            <dd class="col-12 col-sm-9 mb-0">{{ author.death_date|default:"N/A" }}</dd>
+
+                            <dt class="col-12 col-sm-3 text-muted"><i class="fas fa-book-reader me-2"></i>Biography</dt>
+                            <dd class="col-12 col-sm-9 mb-0">{{ author.biography|default:"No biography available"|linebreaks }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div class="books-section p-3 p-md-4 bg-white rounded shadow-sm">
+                        <h4 class="text-primary mb-4 border-bottom pb-2"><i class="fas fa-books me-2"></i>Books by Author</h4>
+                        {% if author.books.all %}
+                        <div class="list-group">
+                            {% for book in author.books.all %}
+                            <a href="{% url 'book_detail' pk=book.pk %}" class="list-group-item list-group-item-action hover-scale-sm">
+                                <i class="fas fa-book me-2"></i>{{ book.title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>No books available for this author.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-scale {
+    transition: all 0.3s ease;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+}
+.hover-scale-sm:hover {
+    transform: scale(1.02);
+}
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.info-section, .books-section {
+    transition: all 0.3s ease;
+}
+.info-section:hover, .books-section:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15)!important;
+}
+.list-group-item {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+.list-group-item:hover {
+    border-left: 3px solid #4e73df;
+    background-color: #f8f9fa;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 1rem;
+    border: none;
+    margin-bottom: 0.5rem;
+    width: auto;
+}
+
+@media (max-width: 576px) {
+    .btn {
+        width: 100%;
+    }
+    .btn i {
+        width: 20px;
+        text-align: center;
+    }
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #e74a3b 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(45deg, #c0392b 0%, #e74a3b 100%);
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, #f6c23e 0%, #f39c12 100%);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(45deg, #f39c12 0%, #f6c23e 100%);
+}
+
+.btn-info {
+    background: linear-gradient(45deg, #36b9cc 0%, #2980b9 100%);
+    color: white;
+}
+
+.btn-info:hover {
+    background: linear-gradient(45deg, #2980b9 0%, #36b9cc 100%);
+}
+
+/* Add shadow effect to buttons */
+.btn {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+}
+
+/* Add pulse animation to PDF button */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(231, 74, 59, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(231, 74, 59, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(231, 74, 59, 0);
+    }
+}
+
+.btn-danger {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+    h2 {
+        font-size: 1.75rem;
+    }
+    h3 {
+        font-size: 1.5rem;
+    }
+    h4 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Spacing adjustments for mobile */
+@media (max-width: 576px) {
+    .container {
+        padding: 0.5rem;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .info-section, .books-section {
+        padding: 1rem !important;
+    }
+}
+</style>
+{% endblock %}

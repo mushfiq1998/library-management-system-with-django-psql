@@ -1,0 +1,64 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Delete Author{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0 fs-3"><i class="fas fa-exclamation-triangle me-2"></i>Delete Author</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to delete the author "{{ author.name }}"?</p>
+                    {% if author.books.count > 0 %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Warning: This author has {{ author.books.count }} book{{ author.books.count|pluralize }} associated with them.
+                    </div>
+                    {% endif %}
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <button type="submit" class="btn btn-danger hover-scale w-100 w-sm-auto">
+                                <i class="fas fa-trash me-2"></i>Confirm Delete
+                            </button>
+                            <a href="{% url 'author_list' %}" class="btn btn-secondary hover-scale w-100 w-sm-auto">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-scale {
+    transition: transform 0.2s;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.btn {
+    border-radius: 8px;
+}
+@media (max-width: 576px) {
+    .card-header h2 {
+        font-size: 1.5rem;
+    }
+    .lead {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

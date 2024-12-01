@@ -1,0 +1,200 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+
+{% block title %}{{ report_type }} Report Results{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                <h6 class="m-0 font-weight-bold text-primary">Report Results</h6>
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Export to Excel
+                    </button>
+                    <button class="btn btn-danger" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                    <a href="{% url 'finance:generate_report' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Report Generator
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Report Header -->
+            <div class="mb-4">
+                <h5 class="font-weight-bold">Report Parameters</h5>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <p><strong>Report Type:</strong> {{ report_type|title }}</p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <p><strong>Start Date:</strong> {{ start_date|date:"Y-m-d" }}</p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <p><strong>End Date:</strong> {{ end_date|date:"Y-m-d" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-6">
+                    <div class="card border-left-primary h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Amount</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        ${{ total|floatformat:2 }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="reportTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th class="d-none d-md-table-cell">Payment Method</th>
+                            <th class="d-none d-lg-table-cell">Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td data-label="Transaction ID">{{ transaction.transaction_id }}</td>
+                            <td data-label="Date">{{ transaction.date|date:"Y-m-d H:i" }}</td>
+                            <td data-label="Category">{{ transaction.category }}</td>
+                            <td data-label="Amount">${{ transaction.amount|floatformat:2 }}</td>
+                            <td class="d-none d-md-table-cell" data-label="Payment Method">{{ transaction.payment_method }}</td>
+                            <td class="d-none d-lg-table-cell" data-label="Description">{{ transaction.description }}</td>
+                            <td data-label="Status">
+                                <span class="badge {% if transaction.status == 'COMPLETED' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ transaction.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No transactions found for the selected criteria</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-primary">
+                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                            <td class="fw-bold">${{ total|floatformat:2 }}</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#reportTable').DataTable({
+            "order": [[1, "desc"]],
+            "pageLength": 25,
+            "dom": 'Bfrtip',
+            "buttons": [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            responsive: true,
+            autoWidth: false
+        });
+    });
+
+    function exportToExcel() {
+        const table = document.getElementById('reportTable');
+        const wb = XLSX.utils.table_to_book(table, {sheet: "Financial Report"});
+        XLSX.writeFile(wb, 'Financial_Report_{{ start_date|date:"Y-m-d" }}_to_{{ end_date|date:"Y-m-d" }}.xlsx');
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .btn, .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_paginate {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .table {
+            width: 100% !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .table td::before {
+            content: attr(data-label);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .table td {
+            display: block;
+            text-align: right;
+            border: none;
+        }
+        
+        .table thead {
+            display: none;
+        }
+        
+        .table tr {
+            display: block;
+            border: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .border-left-primary {
+        border-left: .25rem solid #4e73df!important;
+    }
+    .text-gray-300 {
+        color: #dddfeb!important;
+    }
+    .text-gray-800 {
+        color: #5a5c69!important;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+{% endblock %} 

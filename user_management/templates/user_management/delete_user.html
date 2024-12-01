@@ -1,0 +1,61 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Delete User{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Sidebar -->
+        <div class="col-12 col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#userManagementMenu" aria-expanded="true">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">User Management</h5>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="collapse show" id="userManagementMenu">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user me-2"></i>My Profile
+                        </a>
+                        <a href="{% url 'manage_users' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                        <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-12 col-md-9">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete User</h5>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-break">Are you sure you want to delete the user "{{ user_to_delete.username }}"?</h5>
+                    <p class="text-danger">This action cannot be undone!</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Delete User
+                            </button>
+                            <a href="{% url 'manage_users' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

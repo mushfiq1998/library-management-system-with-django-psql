@@ -1,0 +1,19 @@
+# Django and Django-related packages
+Django==4.2.16
+django-crispy-forms==2.1
+crispy-bootstrap5==2023.10
+
+# Python packages
+asgiref==3.7.2
+sqlparse==0.4.4
+typing_extensions==4.9.0
+tzdata==2023.4
+
+# Development tools (optional)
+django-debug-toolbar==4.2.0  # For debugging 
+
+# Additional packages
+Pillow==10.0.0
+python-barcode==0.14.0
+qrcode==7.4.2
+reportlab==4.0.7

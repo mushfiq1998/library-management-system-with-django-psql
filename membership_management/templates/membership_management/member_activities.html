@@ -1,0 +1,210 @@
+{% extends 'user_management/base.html' %}
+{% load membership_filters %}
+
+{% block title %}Member Activities - {{ membership.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'membership:membership_list' %}" class="text-decoration-none">
+                    <i class="fas fa-users me-2"></i>Memberships
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ membership.user.get_full_name }}'s Activities</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+            <h3 class="mb-0 fs-4">
+                <i class="fas fa-history me-2"></i>Activity History - {{ membership.user.get_full_name }}
+            </h3>
+            <div class="d-flex gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-3 p-md-4">
+            <!-- Member Info Card -->
+            <div class="card mb-4 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-user me-2"></i>Member Information
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <p class="mb-2"><strong>Name:</strong> {{ membership.user.get_full_name }}</p>
+                            <p class="mb-2"><strong>Username:</strong> {{ membership.user.username }}</p>
+                            <p class="mb-2"><strong>Email:</strong> <span class="text-break">{{ membership.user.email }}</span></p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <p class="mb-2"><strong>Plan:</strong> {{ membership.plan.name }}</p>
+                            <p class="mb-2"><strong>Start Date:</strong> {{ membership.start_date }}</p>
+                            <p class="mb-2"><strong>End Date:</strong> {{ membership.end_date }}</p>
+                            <p class="mb-2">
+                                <strong>Status:</strong> 
+                                <span class="badge {% if membership.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ membership.is_active|yesno:"Active,Inactive" }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if activities %}
+            <div class="timeline">
+                {% for activity in activities %}
+                <div class="timeline-item">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <div class="timeline-date">
+                                {{ activity.activity_date|date:"Y-m-d H:i" }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <div class="timeline-content card">
+                                <div class="card-body">
+                                    <h5 class="card-title d-flex align-items-center">
+                                        {% if activity.activity_type == 'CREATE' %}
+                                            <i class="fas fa-plus-circle text-success me-2"></i>
+                                        {% elif activity.activity_type == 'UPDATE' %}
+                                            <i class="fas fa-edit text-primary me-2"></i>
+                                        {% elif activity.activity_type == 'RENEW' %}
+                                            <i class="fas fa-sync text-info me-2"></i>
+                                        {% elif activity.activity_type == 'EXPIRE' %}
+                                            <i class="fas fa-clock text-warning me-2"></i>
+                                        {% elif activity.activity_type == 'CANCEL' %}
+                                            <i class="fas fa-ban text-danger me-2"></i>
+                                        {% elif activity.activity_type == 'PAYMENT' %}
+                                            <i class="fas fa-money-bill-wave text-success me-2"></i>
+                                        {% endif %}
+                                        <span class="text-break">{{ activity.get_activity_type_display }}</span>
+                                    </h5>
+                                    <p class="card-text text-break">{{ activity.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No activities found for this member.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Activity Summary -->
+    <div class="row g-4 mt-4">
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title fs-6">
+                        <i class="fas fa-chart-line me-2"></i>Total Activities
+                    </h5>
+                    <p class="display-4 mb-0">{{ activities|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title fs-6">
+                        <i class="fas fa-sync me-2"></i>Renewals
+                    </h5>
+                    <p class="display-4 mb-0">{{ activities|filter_by_type:'RENEW'|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title fs-6">
+                        <i class="fas fa-clock me-2"></i>Updates
+                    </h5>
+                    <p class="display-4 mb-0">{{ activities|filter_by_type:'UPDATE'|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title fs-6">
+                        <i class="fas fa-money-bill-wave me-2"></i>Payments
+                    </h5>
+                    <p class="display-4 mb-0">{{ activities|filter_by_type:'PAYMENT'|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+
+    .timeline-item {
+        padding: 20px 0;
+    }
+
+    .timeline-date {
+        color: #6c757d;
+        font-weight: bold;
+        padding-top: 10px;
+    }
+
+    .timeline-content {
+        position: relative;
+        margin-left: 20px;
+    }
+
+    .timeline-content::before {
+        content: '';
+        position: absolute;
+        left: -25px;
+        top: 50%;
+        width: 20px;
+        height: 2px;
+        background-color: #dee2e6;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 25%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #dee2e6;
+    }
+
+    @media (max-width: 768px) {
+        .timeline::before {
+            left: 15px;
+        }
+        .timeline-content::before {
+            display: none;
+        }
+        .timeline-date {
+            margin-bottom: 10px;
+        }
+        .display-4 {
+            font-size: calc(1.475rem + 2.7vw);
+        }
+    }
+</style>
+{% endblock %}

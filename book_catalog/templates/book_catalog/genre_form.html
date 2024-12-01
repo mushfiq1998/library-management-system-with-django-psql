@@ -1,0 +1,65 @@
+{% extends 'user_management/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Genre{% endblock %}
+
+{% block content %}
+<div class="container py-3 py-md-5">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 600px;">
+        <div class="card-header bg-gradient-primary text-white">
+            <h2 class="mb-0 font-weight-bold fs-3 fs-md-2">{{ action }} Genre</h2>
+        </div>
+        <div class="card-body bg-light">
+            <form method="post" class="p-2 p-md-3">
+                {% csrf_token %}
+                <div class="col-12 col-md-10 mx-auto">
+                    {{ form|crispy }}
+                </div>
+                <div class="mt-4 text-center d-flex flex-column flex-md-row justify-content-center gap-2 gap-md-3">
+                    <button type="submit" class="btn btn-primary px-3 px-md-4 shadow-sm hover-scale w-100 w-md-auto">
+                        <i class="fas fa-save me-2"></i>{{ action }} Genre
+                    </button>
+                    <a href="{% url 'genre_list' %}" class="btn btn-secondary px-3 px-md-4 shadow-sm hover-scale w-100 w-md-auto">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-scale {
+    transition: transform 0.2s;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.btn {
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .card {
+        margin: 0 15px;
+    }
+    .btn {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %} 

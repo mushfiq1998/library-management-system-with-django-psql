@@ -1,0 +1,186 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Collect Fine{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                    <h6 class="m-0 mb-2 mb-sm-0 font-weight-bold text-primary">Collect Fine Payment</h6>
+                    <a href="{% url 'finance:fine_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Fine List
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Fine Selection -->
+                        <div class="mb-4">
+                            {{ form.fine|as_crispy_field }}
+                        </div>
+
+                        <!-- Selected Fine Details -->
+                        <div id="fineDetails" class="card mb-4 d-none">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">Fine Details</h6>
+                                <dl class="row mb-0">
+                                    <dt class="col-5 col-sm-4">User:</dt>
+                                    <dd class="col-7 col-sm-8" id="fineUser"></dd>
+
+                                    <dt class="col-5 col-sm-4">Amount Due:</dt>
+                                    <dd class="col-7 col-sm-8" id="fineAmount"></dd>
+
+                                    <dt class="col-5 col-sm-4">Reason:</dt>
+                                    <dd class="col-7 col-sm-8" id="fineReason"></dd>
+
+                                    <dt class="col-5 col-sm-4">Due Date:</dt>
+                                    <dd class="col-7 col-sm-8" id="fineDueDate"></dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mb-4">
+                            {{ form.payment_method|as_crispy_field }}
+                        </div>
+
+                        <!-- Amount Collection -->
+                        <div class="mb-4">
+                            {{ form.collected_amount|as_crispy_field }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-hand-holding-usd me-2"></i>Collect Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fineSelect = document.getElementById('id_fine');
+    const fineDetails = document.getElementById('fineDetails');
+    const fineUser = document.getElementById('fineUser');
+    const fineAmount = document.getElementById('fineAmount');
+    const fineReason = document.getElementById('fineReason');
+    const fineDueDate = document.getElementById('fineDueDate');
+    const collectedAmount = document.getElementById('id_collected_amount');
+
+    // Function to update fine details
+    function updateFineDetails() {
+        const selectedOption = fineSelect.options[fineSelect.selectedIndex];
+        if (selectedOption.value) {
+            const fineData = JSON.parse(selectedOption.dataset.fine);
+            fineUser.textContent = fineData.user;
+            fineAmount.textContent = `$${fineData.amount}`;
+            fineReason.textContent = fineData.reason;
+            fineDueDate.textContent = fineData.due_date;
+            collectedAmount.value = fineData.amount;
+            fineDetails.classList.remove('d-none');
+        } else {
+            fineDetails.classList.add('d-none');
+            collectedAmount.value = '';
+        }
+    }
+
+    // Update fine details when selection changes
+    fineSelect.addEventListener('change', updateFineDetails);
+
+    // Initialize fine details if a fine is pre-selected
+    if (fineSelect.value) {
+        updateFineDetails();
+    }
+
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    dl.row {
+        margin-bottom: 0;
+    }
+    dt {
+        font-weight: 600;
+        color: #4e73df;
+    }
+    dd {
+        margin-bottom: 0.5rem;
+        word-break: break-word;
+    }
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2653d4;
+    }
+
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem;
+        }
+        .form-label {
+            font-size: 0.9rem;
+        }
+        .form-control {
+            font-size: 0.9rem;
+        }
+        dl.row {
+            font-size: 0.9rem;
+        }
+        .btn {
+            font-size: 0.9rem;
+        }
+        .card-subtitle {
+            font-size: 0.95rem;
+        }
+        .alert {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %} 

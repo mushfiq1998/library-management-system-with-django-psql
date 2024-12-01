@@ -1,0 +1,136 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-3 py-md-4">
+    <!-- Back to Dashboard Button -->
+    <div class="mb-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow border-0 mb-4">
+        <div class="card-header py-3">
+            <h3 class="h5 mb-0 text-primary">My Loans</h3>
+        </div>
+        <div class="card-body p-0 p-md-3">
+            {% if loans %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-primary">
+                            <th class="fw-bold px-3">Book</th>
+                            <th class="fw-bold px-3">Issue Date</th>
+                            <th class="fw-bold px-3">Due Date</th>
+                            <th class="fw-bold px-3">Status</th>
+                            <th class="fw-bold px-3">Fine</th>
+                            <th class="fw-bold px-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in loans %}
+                        <tr class="align-middle">
+                            <td class="px-3">
+                                <div class="text-truncate" style="max-width: 200px;">
+                                    {{ loan.book.title }}
+                                </div>
+                            </td>
+                            <td class="px-3">{{ loan.issue_date|date:"M d, Y" }}</td>
+                            <td class="px-3">{{ loan.due_date|date:"M d, Y" }}</td>
+                            <td class="px-3">
+                                <span class="badge {% if loan.status == 'issued' %}bg-primary{% elif loan.status == 'returned' %}bg-success{% elif loan.status == 'overdue' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    {{ loan.status|title }}
+                                </span>
+                            </td>
+                            <td class="px-3">
+                                {% if loan.fine_amount > 0 %}
+                                    ${{ loan.fine_amount }}
+                                    {% if not loan.fine_paid %}
+                                        <form method="post" action="{% url 'circulation:pay_fine' loan.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-warning btn-sm w-100 w-sm-auto mt-2 mt-sm-0">
+                                                <i class="fas fa-dollar-sign me-2"></i>Pay Fine
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="badge bg-success">Paid</span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="px-3">
+                                {% if loan.status == 'issued' %}
+                                    <div class="d-flex flex-column flex-sm-row gap-2">
+                                        <form method="post" action="{% url 'circulation:return_book' loan.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                                                <i class="fas fa-undo me-2"></i>Return
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{% url 'circulation:renew_book' loan.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm w-100 w-sm-auto">
+                                                <i class="fas fa-sync me-2"></i>Renew
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-3">
+                <p class="mb-0">No active loans.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-header py-3">
+            <h3 class="h5 mb-0 text-primary">My Holds</h3>
+        </div>
+        <div class="card-body p-0 p-md-3">
+            {% if holds %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-primary">
+                            <th class="fw-bold px-3">Book</th>
+                            <th class="fw-bold px-3">Request Date</th>
+                            <th class="fw-bold px-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hold in holds %}
+                        <tr class="align-middle">
+                            <td class="px-3">
+                                <div class="text-truncate" style="max-width: 200px;">
+                                    {{ hold.book.title }}
+                                </div>
+                            </td>
+                            <td class="px-3">{{ hold.request_date|date:"M d, Y" }}</td>
+                            <td class="px-3">
+                                <span class="badge {% if hold.status == 'pending' %}bg-warning{% elif hold.status == 'ready' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ hold.status|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-3">
+                <p class="mb-0">No active holds.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

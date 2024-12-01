@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Management System{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <!-- Navbar Brand-->
+        <a class="navbar-brand ps-3" href="{% url 'dashboard' %}">Library System</a>
+        <!-- Sidebar Toggle-->
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars"></i>
+        </button>
+        <!-- Navbar-->
+        <ul class="navbar-nav ms-auto me-3">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <!-- Sidebar content will go here -->
+                </div>
+            </nav>
+        </div>
+
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom scripts -->
+    <script>
+        // Toggle sidebar
+        window.addEventListener('DOMContentLoaded', event => {
+            const sidebarToggle = document.body.querySelector('#sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', event => {
+                    event.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                });
+            }
+        });
+    </script>
+
+    <style>
+    .sb-nav-fixed {
+        padding-top: 56px;
+    }
+    
+    #layoutSidenav {
+        display: flex;
+    }
+    
+    #layoutSidenav_nav {
+        flex-basis: 225px;
+        flex-shrink: 0;
+        transition: transform .15s ease-in-out;
+        z-index: 1038;
+        transform: translateX(0);
+    }
+    
+    #layoutSidenav_content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0;
+        flex-grow: 1;
+        min-height: calc(100vh - 56px);
+        margin-left: -225px;
+    }
+    
+    .sb-sidenav-toggled #layoutSidenav_nav {
+        transform: translateX(-225px);
+    }
+    
+    .sb-sidenav-toggled #layoutSidenav_content {
+        margin-left: 0;
+    }
+    
+    .sb-sidenav {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        flex-wrap: nowrap;
+    }
+    
+    .sb-sidenav .sb-sidenav-menu {
+        flex-grow: 1;
+    }
+    
+    .sb-sidenav .sb-sidenav-menu .nav {
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+    
+    .sb-sidenav .sb-sidenav-menu .nav .sb-sidenav-menu-heading {
+        padding: 1.75rem 1rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .sb-sidenav .sb-sidenav-menu .nav .nav-link {
+        display: flex;
+        align-items: center;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        position: relative;
+    }
+    
+    .sb-sidenav .sb-sidenav-menu .nav .nav-link .sb-nav-link-icon {
+        font-size: 0.9rem;
+        padding-right: 0.5rem;
+    }
+    
+    .sb-sidenav .sb-sidenav-footer {
+        padding: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    @media (min-width: 992px) {
+        #layoutSidenav_nav {
+            transform: translateX(0);
+        }
+        
+        #layoutSidenav_content {
+            margin-left: 0;
+            transition: margin 0.15s ease-in-out;
+        }
+    
+        .sb-sidenav-toggled #layoutSidenav_nav {
+            transform: translateX(0);
+        }
+        
+        .sb-sidenav-toggled #layoutSidenav_content {
+            margin-left: 225px;
+        }
+    }
+    </style>
+</body>
+</html> 

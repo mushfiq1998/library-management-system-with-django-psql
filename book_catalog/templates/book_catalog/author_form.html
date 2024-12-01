@@ -1,0 +1,68 @@
+{% extends 'user_management/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Author{% endblock %}
+
+{% block content %}
+<div class="container py-3 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-11 col-md-9 col-lg-7 col-xl-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h2 class="h3 mb-0 font-weight-bold">{{ action }} Author</h2>
+                </div>
+                <div class="card-body bg-light">
+                    <form method="post" class="p-2 p-md-3">
+                        {% csrf_token %}
+                        <div class="px-0 px-md-4">
+                            {{ form|crispy }}
+                        </div>
+                        <div class="mt-4 d-flex flex-column flex-sm-row justify-content-center gap-3">
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm hover-scale w-100 w-sm-auto">
+                                <i class="fas fa-save me-2"></i>{{ action }} Author
+                            </button>
+                            <a href="{% url 'author_list' %}" class="btn btn-secondary px-4 shadow-sm hover-scale w-100 w-sm-auto">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-scale {
+    transition: transform 0.2s;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.btn {
+    border-radius: 8px;
+}
+@media (max-width: 575.98px) {
+    .card-body {
+        padding: 1rem;
+    }
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

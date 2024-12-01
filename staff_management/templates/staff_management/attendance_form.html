@@ -1,0 +1,221 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}{{ action }} Attendance Record{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient-primary text-white py-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                <h2 class="h4 mb-0 text-center text-sm-start">
+                    <i class="fas fa-clock me-2"></i>{{ action }} Attendance Record
+                </h2>
+                <a href="{% url 'staff:attendance_list' %}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Attendance List
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-3 p-md-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10 col-xl-8">
+                        <div class="card">
+                            <div class="card-body p-3 p-md-4">
+                                <div class="mb-4">
+                                    <label for="{{ form.staff_member.id_for_label }}" class="form-label">
+                                        Staff Member <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.staff_member }}
+                                    {% if form.staff_member.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.staff_member.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-sm-6">
+                                        <div class="mb-4">
+                                            <label for="{{ form.date.id_for_label }}" class="form-label">
+                                                Date <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.date }}
+                                            {% if form.date.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.date.errors|join:", " }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="mb-4">
+                                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                                Status <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.status }}
+                                            {% if form.status.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.status.errors|join:", " }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-sm-6">
+                                        <div class="mb-4">
+                                            <label for="{{ form.check_in.id_for_label }}" class="form-label">
+                                                Check In Time <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.check_in }}
+                                            {% if form.check_in.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.check_in.errors|join:", " }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="mb-4">
+                                            <label for="{{ form.check_out.id_for_label }}" class="form-label">
+                                                Check Out Time
+                                            </label>
+                                            {{ form.check_out }}
+                                            {% if form.check_out.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.check_out.errors|join:", " }}
+                                                </div>
+                                            {% endif %}
+                                            <div class="form-text">Leave blank if not checked out yet</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                        Notes
+                                    </label>
+                                    {{ form.notes }}
+                                    {% if form.notes.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.notes.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Any additional notes about the attendance</div>
+                                </div>
+
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {% for error in form.non_field_errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="mt-4 d-flex flex-column flex-sm-row gap-3 justify-content-start">
+                                    <button type="submit" class="btn btn-primary w-100 w-sm-auto">
+                                        <i class="fas fa-save me-2"></i>Save Record
+                                    </button>
+                                    <a href="{% url 'staff:attendance_list' %}" class="btn btn-secondary w-100 w-sm-auto">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d3e2;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78,115,223,0.25);
+}
+
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener to status select
+    const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+    const checkInInput = document.getElementById('{{ form.check_in.id_for_label }}');
+    const checkOutInput = document.getElementById('{{ form.check_out.id_for_label }}');
+
+    statusSelect.addEventListener('change', function() {
+        if (this.value === 'ABSENT') {
+            checkInInput.value = '';
+            checkOutInput.value = '';
+            checkInInput.disabled = true;
+            checkOutInput.disabled = true;
+        } else {
+            checkInInput.disabled = false;
+            checkOutInput.disabled = false;
+        }
+    });
+
+    // Set initial state
+    if (statusSelect.value === 'ABSENT') {
+        checkInInput.disabled = true;
+        checkOutInput.disabled = true;
+    }
+});
+</script>
+{% endblock %}

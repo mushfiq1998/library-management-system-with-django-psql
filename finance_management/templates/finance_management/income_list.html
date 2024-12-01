@@ -1,0 +1,212 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+
+{% block title %}Income List{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="row align-items-center">
+                <div class="col-12 col-sm-6 mb-2 mb-sm-0">
+                    <h6 class="m-0 font-weight-bold text-primary">Income Records</h6>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="d-flex flex-wrap gap-2 justify-content-sm-end">
+                        <a href="{% url 'finance:income_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add New Income
+                        </a>
+                        <button class="btn btn-success" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel me-2"></i>Export to Excel
+                        </button>
+                        <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    <div class="card border-left-primary h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Income</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        ${{ total_amount|floatformat:2 }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="incomeTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Income ID</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th class="d-none d-md-table-cell">Received From</th>
+                            <th class="d-none d-lg-table-cell">Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for income in incomes %}
+                        <tr>
+                            <td>{{ income.income_id }}</td>
+                            <td>{{ income.date|date:"Y-m-d H:i" }}</td>
+                            <td>{{ income.get_category_display }}</td>
+                            <td>${{ income.amount|floatformat:2 }}</td>
+                            <td class="d-none d-md-table-cell">{{ income.received_from }}</td>
+                            <td class="d-none d-lg-table-cell">{{ income.get_payment_method_display }}</td>
+                            <td>
+                                <span class="badge {% if income.status == 'COMPLETED' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ income.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#detailModal{{ income.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="{% url 'finance:income_update' income.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'finance:income_delete' income.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Detail Modal -->
+                        <div class="modal fade" id="detailModal{{ income.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Income Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <dl class="row">
+                                            <dt class="col-sm-4">Income ID:</dt>
+                                            <dd class="col-sm-8">{{ income.income_id }}</dd>
+
+                                            <dt class="col-sm-4">Date:</dt>
+                                            <dd class="col-sm-8">{{ income.date|date:"Y-m-d H:i" }}</dd>
+
+                                            <dt class="col-sm-4">Category:</dt>
+                                            <dd class="col-sm-8">{{ income.get_category_display }}</dd>
+
+                                            <dt class="col-sm-4">Amount:</dt>
+                                            <dd class="col-sm-8">${{ income.amount|floatformat:2 }}</dd>
+
+                                            <dt class="col-sm-4">Received From:</dt>
+                                            <dd class="col-sm-8">{{ income.received_from }}</dd>
+
+                                            <dt class="col-sm-4">Payment Method:</dt>
+                                            <dd class="col-sm-8">{{ income.get_payment_method_display }}</dd>
+
+                                            <dt class="col-sm-4">Status:</dt>
+                                            <dd class="col-sm-8">{{ income.status }}</dd>
+
+                                            <dt class="col-sm-4">Description:</dt>
+                                            <dd class="col-sm-8">{{ income.description }}</dd>
+
+                                            <dt class="col-sm-4">Recorded By:</dt>
+                                            <dd class="col-sm-8">{{ income.recorded_by.username }}</dd>
+
+                                            {% if income.reference_number %}
+                                            <dt class="col-sm-4">Reference:</dt>
+                                            <dd class="col-sm-8">{{ income.reference_number }}</dd>
+                                            {% endif %}
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No income records found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#incomeTable').DataTable({
+            "order": [[1, "desc"]],
+            "pageLength": 25,
+            responsive: true,
+            autoWidth: false
+        });
+    });
+
+    function exportToExcel() {
+        const table = document.getElementById('incomeTable');
+        const wb = XLSX.utils.table_to_book(table, {sheet: "Income Records"});
+        XLSX.writeFile(wb, 'Income_Records_{{ today|date:"Y-m-d" }}.xlsx');
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .border-left-primary {
+        border-left: .25rem solid #4e73df!important;
+    }
+    .text-gray-300 {
+        color: #dddfeb!important;
+    }
+    .text-gray-800 {
+        color: #5a5c69!important;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .btn-group {
+        gap: 0.25rem;
+    }
+    .badge {
+        font-size: 0.875rem;
+    }
+    @media (max-width: 576px) {
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .btn-group .btn {
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %} 

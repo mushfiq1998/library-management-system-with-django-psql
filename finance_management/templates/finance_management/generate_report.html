@@ -1,0 +1,172 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Generate Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                    <h6 class="m-0 mb-2 mb-sm-0 font-weight-bold text-primary">Generate Financial Report</h6>
+                    <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Report Type -->
+                        <div class="mb-4">
+                            {{ form.report_type|as_crispy_field }}
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="row mb-4">
+                            <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                {{ form.start_date|as_crispy_field }}
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                {{ form.end_date|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Quick Date Selections -->
+                        <div class="mb-4">
+                            <label class="form-label">Quick Select</label>
+                            <div class="d-grid d-sm-flex gap-2">
+                                <button type="button" class="btn btn-outline-primary" onclick="setDateRange('today')">
+                                    Today
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setDateRange('week')">
+                                    This Week
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setDateRange('month')">
+                                    This Month
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setDateRange('year')">
+                                    This Year
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-file-export me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Report Tips -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Report Generation Tips</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-sm-6 mb-4 mb-sm-0">
+                            <h6 class="font-weight-bold mb-3">Available Reports</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>All Transactions</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Income Only</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Expenses Only</li>
+                            </ul>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <h6 class="font-weight-bold mb-3">Features</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-file-excel text-success me-2"></i>Export to Excel</li>
+                                <li><i class="fas fa-print text-success me-2"></i>Print Report</li>
+                                <li><i class="fas fa-filter text-success me-2"></i>Custom Date Ranges</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function setDateRange(period) {
+    const today = new Date();
+    let startDate = new Date(today);
+    const endDate = today;
+
+    switch(period) {
+        case 'today':
+            startDate = today;
+            break;
+        case 'week':
+            startDate.setDate(today.getDate() - today.getDay());
+            break;
+        case 'month':
+            startDate.setDate(1);
+            break;
+        case 'year':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            break;
+    }
+
+    document.getElementById('id_start_date').value = startDate.toISOString().split('T')[0];
+    document.getElementById('id_end_date').value = endDate.toISOString().split('T')[0];
+}
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(event) {
+    if (!this.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    this.classList.add('was-validated');
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .list-unstyled li {
+        margin-bottom: 0.75rem;
+    }
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    @media (max-width: 576px) {
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}

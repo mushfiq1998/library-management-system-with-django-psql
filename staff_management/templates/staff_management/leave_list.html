@@ -1,0 +1,160 @@
+{% extends 'user_management/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Leave Requests{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient-primary text-white py-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{% url 'staff:staff_dashboard' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <h2 class="h4 mb-0 text-center text-sm-start">
+                        <i class="fas fa-calendar-alt me-2"></i>Leave Requests
+                    </h2>
+                </div>
+                <a href="{% url 'staff:leave_create' %}" class="btn btn-light w-100 w-sm-auto">
+                    <i class="fas fa-plus me-2"></i>Apply for Leave
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-3 p-md-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if leaves %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Staff Member</th>
+                                <th>Leave Type</th>
+                                <th class="d-none d-md-table-cell">Duration</th>
+                                <th>Status</th>
+                                <th class="d-none d-lg-table-cell">Applied On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in leaves %}
+                                <tr>
+                                    <td>{{ leave.staff_member.user.get_full_name }}</td>
+                                    <td>{{ leave.get_leave_type_display }}</td>
+                                    <td class="d-none d-md-table-cell">
+                                        {{ leave.start_date|date:"M d, Y" }} - {{ leave.end_date|date:"M d, Y" }}
+                                        <br>
+                                        <small class="text-muted">{{ leave.duration }} day{{ leave.duration|pluralize }}</small>
+                                    </td>
+                                    <td>
+                                        {% if leave.status == 'PENDING' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif leave.status == 'APPROVED' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif leave.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">{{ leave.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            <a href="{% url 'staff:leave_detail' pk=leave.pk %}" 
+                                               class="btn btn-sm btn-info text-white" 
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if leave.status == 'PENDING' %}
+                                                {% if leave.staff_member.user == request.user %}
+                                                    <a href="{% url 'staff:leave_edit' pk=leave.pk %}" 
+                                                       class="btn btn-sm btn-warning" 
+                                                       title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'staff:leave_delete' pk=leave.pk %}" 
+                                                       class="btn btn-sm btn-danger" 
+                                                       title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                {% endif %}
+                                                {% if 'ADMIN,LIBRARIAN'|split:"," %}
+                                                    <a href="{% url 'staff:leave_action' pk=leave.pk %}" 
+                                                       class="btn btn-sm btn-success" 
+                                                       title="Take Action">
+                                                        <i class="fas fa-check-circle"></i>
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <p class="lead text-muted">No leave requests found.</p>
+                    <a href="{% url 'staff:leave_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Apply for Leave
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.btn {
+    margin: 0 2px;
+    border-radius: 4px !important;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fc;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.8em;
+}
+
+@media (max-width: 576px) {
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.6em;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
+</script>
+{% endblock %}

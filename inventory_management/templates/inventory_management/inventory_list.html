@@ -1,0 +1,171 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Inventory Management{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0">
+    <div class="card-header bg-gradient-primary text-white d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center py-3 gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm" title="Back to Dashboard">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+            <h2 class="mb-0 fs-4 fs-sm-3"><i class="fas fa-boxes me-2"></i>Inventory Management</h2>
+        </div>
+    </div>
+
+    <div class="card-body border-bottom">
+        <form method="get" class="search-form">
+            <div class="row g-3">
+                <div class="col-12 col-md-8">
+                    <div class="input-group">
+                        <input type="text" 
+                               name="search" 
+                               class="form-control" 
+                               placeholder="Search by book title or ISBN..."
+                               value="{{ search_query }}"
+                               aria-label="Search inventory">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i><span class="d-none d-sm-inline ms-1">Search</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="" {% if not filter_status %}selected{% endif %}>All Items</option>
+                        <option value="low" {% if filter_status == 'low' %}selected{% endif %}>Low Stock</option>
+                        <option value="out" {% if filter_status == 'out' %}selected{% endif %}>Out of Stock</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-3 p-md-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if inventory_items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Book Title</th>
+                        <th class="d-none d-md-table-cell">ISBN</th>
+                        <th class="d-none d-sm-table-cell">Total</th>
+                        <th class="d-none d-sm-table-cell">Available</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in inventory_items %}
+                    <tr>
+                        <td class="text-break">{{ item.book.title }}</td>
+                        <td class="d-none d-md-table-cell">{{ item.book.isbn }}</td>
+                        <td class="d-none d-sm-table-cell">{{ item.total_copies }}</td>
+                        <td class="d-none d-sm-table-cell">{{ item.available_copies }}</td>
+                        <td>
+                            {% if item.available_copies == 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% elif item.needs_reorder %}
+                                <span class="badge bg-warning text-dark">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success">In Stock</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <a href="{% url 'inventory:inventory_detail' pk=item.pk %}" 
+                                   class="btn btn-sm btn-info text-white">
+                                    <i class="fas fa-eye"></i><span class="d-none d-lg-inline ms-1">View</span>
+                                </a>
+                                <a href="{% url 'inventory:adjust_inventory' pk=item.pk %}" 
+                                   class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i><span class="d-none d-lg-inline ms-1">Adjust</span>
+                                </a>
+                                <a href="{% url 'inventory:report_damaged' pk=item.pk %}" 
+                                   class="btn btn-sm btn-danger">
+                                    <i class="fas fa-exclamation-triangle"></i><span class="d-none d-lg-inline ms-1">Damage</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4 py-md-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <p class="lead text-muted">
+                {% if search_query %}
+                No inventory items found matching your search criteria.
+                {% else %}
+                No inventory items available.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.search-form {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.btn {
+    border-radius: 6px;
+    padding: 0.375rem 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.8em;
+}
+
+.table th {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.6em;
+    }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,207 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+
+{% block title %}Expense List{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+            <h6 class="m-0 mb-2 mb-sm-0 font-weight-bold text-primary">Expense Records</h6>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <a href="{% url 'finance:expense_create' %}" class="btn btn-primary mb-2 mb-sm-0">
+                    <i class="fas fa-plus me-2"></i>Add New Expense
+                </a>
+                <button class="btn btn-success mb-2 mb-sm-0" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel me-2"></i>Export to Excel
+                </button>
+                <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    <div class="card border-left-danger">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                        Total Expenses</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        ${{ total_amount|floatformat:2 }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="expenseTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="d-none d-md-table-cell">Expense ID</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th class="d-none d-lg-table-cell">Paid To</th>
+                            <th class="d-none d-lg-table-cell">Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td class="d-none d-md-table-cell">{{ expense.expense_id }}</td>
+                            <td>{{ expense.date|date:"Y-m-d H:i" }}</td>
+                            <td>{{ expense.get_category_display }}</td>
+                            <td>${{ expense.amount|floatformat:2 }}</td>
+                            <td class="d-none d-lg-table-cell">{{ expense.paid_to }}</td>
+                            <td class="d-none d-lg-table-cell">{{ expense.get_payment_method_display }}</td>
+                            <td>
+                                <span class="badge {% if expense.status == 'COMPLETED' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ expense.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#detailModal{{ expense.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="{% url 'finance:expense_update' expense.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'finance:expense_delete' expense.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Detail Modal -->
+                        <div class="modal fade" id="detailModal{{ expense.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Expense Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <dl class="row">
+                                            <dt class="col-5 col-sm-4">Expense ID:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.expense_id }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Date:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.date|date:"Y-m-d H:i" }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Category:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.get_category_display }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Amount:</dt>
+                                            <dd class="col-7 col-sm-8">${{ expense.amount|floatformat:2 }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Paid To:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.paid_to }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Payment Method:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.get_payment_method_display }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Status:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.status }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Description:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.description }}</dd>
+
+                                            <dt class="col-5 col-sm-4">Recorded By:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.recorded_by.username }}</dd>
+
+                                            {% if expense.invoice_number %}
+                                            <dt class="col-5 col-sm-4">Invoice:</dt>
+                                            <dd class="col-7 col-sm-8">{{ expense.invoice_number }}</dd>
+                                            {% endif %}
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No expense records found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#expenseTable').DataTable({
+            "order": [[1, "desc"]],
+            "pageLength": 25,
+            responsive: true,
+            autoWidth: false
+        });
+    });
+
+    function exportToExcel() {
+        const table = document.getElementById('expenseTable');
+        const wb = XLSX.utils.table_to_book(table, {sheet: "Expense Records"});
+        XLSX.writeFile(wb, 'Expense_Records_{{ today|date:"Y-m-d" }}.xlsx');
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .border-left-danger {
+        border-left: .25rem solid #e74a3b!important;
+    }
+    .text-gray-300 {
+        color: #dddfeb!important;
+    }
+    .text-gray-800 {
+        color: #5a5c69!important;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .btn-group {
+        gap: 0.25rem;
+    }
+    .badge {
+        font-size: 0.875rem;
+    }
+    
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem;
+        }
+        .table {
+            font-size: 0.875rem;
+        }
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %} 

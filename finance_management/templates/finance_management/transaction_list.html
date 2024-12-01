@@ -1,0 +1,234 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <h6 class="m-0 font-weight-bold text-primary">Transaction List</h6>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </button>
+                <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="transactionTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td data-label="Transaction ID">{{ transaction.transaction_id }}</td>
+                            <td data-label="Date">{{ transaction.date|date:"Y-m-d H:i" }}</td>
+                            <td data-label="Type">
+                                <span class="badge {% if transaction.type == 'INCOME' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ transaction.type }}
+                                </span>
+                            </td>
+                            <td data-label="Category">{{ transaction.category }}</td>
+                            <td data-label="Amount">${{ transaction.amount|floatformat:2 }}</td>
+                            <td data-label="Payment Method">{{ transaction.payment_method }}</td>
+                            <td data-label="Status">
+                                <span class="badge {% if transaction.status == 'COMPLETED' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ transaction.status }}
+                                </span>
+                            </td>
+                            <td data-label="Actions">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#detailModal{{ transaction.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if transaction.status != 'COMPLETED' %}
+                                    <button type="button" class="btn btn-sm btn-warning"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editModal{{ transaction.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Detail Modal -->
+                        <div class="modal fade" id="detailModal{{ transaction.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Transaction Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <dl class="row">
+                                            <dt class="col-sm-4">Transaction ID:</dt>
+                                            <dd class="col-sm-8">{{ transaction.transaction_id }}</dd>
+
+                                            <dt class="col-sm-4">Date:</dt>
+                                            <dd class="col-sm-8">{{ transaction.date|date:"Y-m-d H:i" }}</dd>
+
+                                            <dt class="col-sm-4">Type:</dt>
+                                            <dd class="col-sm-8">{{ transaction.type }}</dd>
+
+                                            <dt class="col-sm-4">Category:</dt>
+                                            <dd class="col-sm-8">{{ transaction.category }}</dd>
+
+                                            <dt class="col-sm-4">Amount:</dt>
+                                            <dd class="col-sm-8">${{ transaction.amount|floatformat:2 }}</dd>
+
+                                            <dt class="col-sm-4">Payment Method:</dt>
+                                            <dd class="col-sm-8">{{ transaction.payment_method }}</dd>
+
+                                            <dt class="col-sm-4">Status:</dt>
+                                            <dd class="col-sm-8">{{ transaction.status }}</dd>
+
+                                            <dt class="col-sm-4">Description:</dt>
+                                            <dd class="col-sm-8">{{ transaction.description }}</dd>
+
+                                            <dt class="col-sm-4">Recorded By:</dt>
+                                            <dd class="col-sm-8">{{ transaction.recorded_by.username }}</dd>
+
+                                            {% if transaction.reference_number %}
+                                            <dt class="col-sm-4">Reference:</dt>
+                                            <dd class="col-sm-8">{{ transaction.reference_number }}</dd>
+                                            {% endif %}
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No transactions found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filter Transactions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label class="form-label">Transaction Type</label>
+                        <select name="type" class="form-select">
+                            <option value="">All</option>
+                            <option value="INCOME">Income</option>
+                            <option value="EXPENSE">Expense</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="">All</option>
+                            {% for category in transaction_categories %}
+                            <option value="{{ category.0 }}">{{ category.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <div class="input-group flex-column flex-sm-row gap-2 gap-sm-0">
+                            <input type="date" name="start_date" class="form-control">
+                            <span class="input-group-text d-none d-sm-block">to</span>
+                            <input type="date" name="end_date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary w-100 w-sm-auto">Apply Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#transactionTable').DataTable({
+            "order": [[1, "desc"]],
+            "pageLength": 25,
+            responsive: true
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .badge {
+        font-size: 0.875rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-group {
+        gap: 0.25rem;
+    }
+
+    @media screen and (max-width: 767px) {
+        table thead {
+            display: none;
+        }
+        
+        table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        table td {
+            display: block;
+            text-align: right;
+            padding: 0.5rem;
+            border: none;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        table td:last-child {
+            border-bottom: none;
+        }
+        
+        table td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+        }
+        
+        .btn-group {
+            justify-content: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %} 

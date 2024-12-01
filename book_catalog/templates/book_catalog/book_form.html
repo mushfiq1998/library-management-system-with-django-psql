@@ -1,0 +1,254 @@
+{% extends 'user_management/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Book{% endblock %}
+
+{% block content %}
+<div class="container py-3 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-9">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h2 class="h3 mb-0">{{ action }} Book</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="p-2 p-md-4">
+                        {% csrf_token %}
+                        
+                        <!-- Book Details Section -->
+                        <div class="mb-4">
+                            <h4 class="h5 text-primary mb-3">Book Information</h4>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    {{ form.title|as_crispy_field }}
+                                    {{ form.isbn|as_crispy_field }}
+                                    {{ form.publication_date|as_crispy_field }}
+                                    {{ form.language|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    {{ form.authors|as_crispy_field }}
+                                    {{ form.genres|as_crispy_field }}
+                                    {{ form.edition|as_crispy_field }}
+                                </div>
+                                <div class="col-12">
+                                    {{ form.summary|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Section -->
+                        <div class="mb-4">
+                            <h4 class="h5 text-primary mb-3">Book Location</h4>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    {{ form.shelf|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <!-- Shelf Grid Container -->
+                            <div class="shelf-grid-container mt-3 mb-4" style="display: none;">
+                                <div class="shelf-info mb-3">
+                                    <p class="text-muted mb-2">
+                                        <span class="shelf-dimensions"></span>
+                                    </p>
+                                    <p class="text-muted small mb-0">Click on a cell to select the position</p>
+                                </div>
+                                <div class="shelf-grid-wrapper overflow-auto">
+                                    <div class="shelf-grid">
+                                        <!-- Grid will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                                <div class="legend mt-3 d-flex flex-wrap justify-content-center gap-2">
+                                    <span class="badge bg-success">Selected</span>
+                                    <span class="badge bg-danger">Occupied</span>
+                                    <span class="badge bg-light border">Available</span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-sm-6">
+                                    {{ form.row|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    {{ form.column|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex flex-column flex-sm-row justify-content-center gap-3">
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm hover-scale w-100 w-sm-auto">
+                                <i class="fas fa-save me-2"></i>{{ action }} Book
+                            </button>
+                            <a href="{% url 'book_list' %}" class="btn btn-secondary px-4 shadow-sm hover-scale w-100 w-sm-auto">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.shelf-grid-wrapper {
+    max-width: 100%;
+    border-radius: 8px;
+    background: #f8f9fa;
+    padding: 1rem;
+}
+
+.shelf-grid {
+    display: inline-grid;
+    gap: 4px;
+    margin: 0 auto;
+}
+
+.shelf-cell {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: white;
+    transition: all 0.2s;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+@media (min-width: 768px) {
+    .shelf-cell {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8rem;
+    }
+}
+
+.shelf-cell:hover {
+    background: #e9ecef;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.shelf-cell.occupied {
+    background: #dc3545;
+    color: white;
+    cursor: not-allowed;
+}
+
+.shelf-cell.selected {
+    background: #28a745;
+    color: white;
+}
+
+.shelf-cell.available {
+    background: #ffffff;
+}
+
+.shelf-grid-container {
+    text-align: center;
+}
+
+.hover-scale {
+    transition: transform 0.2s;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const shelfSelect = document.getElementById('id_shelf');
+    const rowInput = document.getElementById('id_row');
+    const columnInput = document.getElementById('id_column');
+    const gridContainer = document.querySelector('.shelf-grid-container');
+    const grid = document.querySelector('.shelf-grid');
+    const shelfDimensions = document.querySelector('.shelf-dimensions');
+
+    function createGrid(rows, cols, occupiedPositions) {
+        grid.style.gridTemplateColumns = `repeat(${cols}, minmax(50px, 60px))`;
+        grid.innerHTML = '';
+        shelfDimensions.textContent = `Shelf Dimensions: ${rows} rows × ${cols} columns`;
+
+        for (let i = 1; i <= rows; i++) {
+            for (let j = 1; j <= cols; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'shelf-cell';
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+                
+                const isOccupied = occupiedPositions.some(
+                    pos => pos.row === i && pos.column === j
+                );
+                
+                if (isOccupied) {
+                    cell.classList.add('occupied');
+                    cell.title = 'Position occupied';
+                } else {
+                    cell.classList.add('available');
+                    cell.title = `Row ${i}, Column ${j}`;
+                }
+
+                if (i === parseInt(rowInput.value) && j === parseInt(columnInput.value)) {
+                    cell.classList.add('selected');
+                }
+
+                cell.textContent = `${i},${j}`;
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    shelfSelect.addEventListener('change', async function() {
+        if (this.value) {
+            try {
+                const response = await fetch(`/api/shelf/${this.value}/positions/`);
+                const data = await response.json();
+                
+                createGrid(data.total_rows, data.total_columns, data.occupied_positions);
+                gridContainer.style.display = 'block';
+                
+                rowInput.max = data.total_rows;
+                columnInput.max = data.total_columns;
+            } catch (error) {
+                console.error('Error fetching shelf data:', error);
+            }
+        } else {
+            gridContainer.style.display = 'none';
+            rowInput.value = '';
+            columnInput.value = '';
+        }
+    });
+
+    grid.addEventListener('click', function(e) {
+        const cell = e.target.closest('.shelf-cell');
+        if (!cell || cell.classList.contains('occupied')) return;
+
+        grid.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+        cell.classList.add('selected');
+        rowInput.value = cell.dataset.row;
+        columnInput.value = cell.dataset.col;
+    });
+
+    if (shelfSelect.value) {
+        shelfSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+
+{% if form.errors %}
+<div class="alert alert-danger">
+    <h4 class="h5">Please correct the following errors:</h4>
+    {{ form.errors }}
+</div>
+{% endif %}
+{% endblock %}

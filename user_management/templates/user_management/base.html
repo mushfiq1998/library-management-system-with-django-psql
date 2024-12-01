@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Management System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Responsive Sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                height: 100vh;
+                z-index: 999;
+                background: white;
+                transition: all 0.3s;
+                overflow-y: auto;
+                width: 80%;
+                max-width: 300px;
+                box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+                opacity: 0;
+                transition: all 0.5s ease-in-out;
+                top: 0;
+                left: 0;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Tables */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+        }
+
+        /* Card Grid System */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        /* Responsive Forms */
+        @media (max-width: 576px) {
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+            
+            .btn-responsive {
+                width: 100%;
+                margin-bottom: 0.75rem;
+            }
+
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Responsive Images */
+        .img-fluid-custom {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Responsive Typography */
+        @media (max-width: 576px) {
+            h1 { font-size: 2rem; line-height: 1.2; }
+            h2 { font-size: 1.75rem; line-height: 1.3; }
+            h3 { font-size: 1.5rem; line-height: 1.4; }
+            p { font-size: 1rem; line-height: 1.5; }
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                padding: 1rem 0;
+            }
+            
+            .dropdown-menu {
+                border: none;
+                padding: 0.5rem;
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .nav-link {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Responsive Spacing */
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .row {
+                margin-left: -0.5rem;
+                margin-right: -0.5rem;
+            }
+            
+            .col, [class*="col-"] {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+
+            .card {
+                margin-bottom: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        /* Utility Classes */
+        .hide-sm {
+            display: none;
+        }
+
+        @media (min-width: 576px) {
+            .hide-sm {
+                display: initial;
+            }
+        }
+
+        /* Responsive Buttons */
+        .btn-group-responsive {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        @media (max-width: 576px) {
+            .btn-group-responsive {
+                flex-direction: column;
+            }
+
+            .btn-group-responsive .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* Additional Responsive Enhancements */
+        .card {
+            height: 100%;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.125);
+        }
+
+        /* Improved Touch Targets */
+        @media (max-width: 768px) {
+            .btn, 
+            .nav-link,
+            .list-group-item {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Toggle Button (Mobile) -->
+    <button class="btn btn-primary d-md-none position-fixed" 
+            style="top: 1rem; right: 1rem; z-index: 1000; padding: 0.75rem;"
+            id="sidebarToggle"
+            aria-label="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar" id="sidebar">
+                {% block sidebar %}{% endblock %}
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Responsive Sidebar JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            }
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+
+            // Close sidebar on window resize if in mobile view
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Handle touch events for better mobile experience
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            document.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+
+            document.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+
+            function handleSwipe() {
+                const swipeThreshold = 100;
+                const diff = touchEndX - touchStartX;
+
+                if (Math.abs(diff) < swipeThreshold) return;
+
+                if (diff > 0 && !sidebar.classList.contains('active')) {
+                    // Swipe right
+                    toggleSidebar();
+                } else if (diff < 0 && sidebar.classList.contains('active')) {
+                    // Swipe left
+                    toggleSidebar();
+                }
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

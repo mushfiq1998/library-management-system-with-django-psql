@@ -1,0 +1,198 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Digital Library{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0">
+    <div class="card-header bg-gradient-primary text-white d-flex flex-column flex-sm-row justify-content-between align-items-center py-3">
+        <div class="d-flex align-items-center gap-3 mb-2 mb-sm-0">
+            <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+            <h2 class="mb-0 fs-4 fs-sm-3"><i class="fas fa-tablet-alt me-2"></i>Digital Library</h2>
+        </div>
+        {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+        <a href="{% url 'digital_library:content_create' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Add Digital Content
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card-body p-3 p-md-4">
+        <!-- Search and Filter Form -->
+        <form method="get" class="mb-4">
+            <div class="row g-2 g-md-3">
+                <div class="col-12 col-sm-6 col-md-4">
+                    {{ form.query }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-2">
+                    {{ form.content_type }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-2">
+                    {{ form.file_format }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-2">
+                    {{ form.sort_by }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if content_list %}
+        <div class="row g-3 g-md-4">
+            {% for content in content_list %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 content-card hover-card">
+                    <div class="position-relative">
+                        {% if content.cover_image %}
+                            <img src="{{ content.cover_image.url }}" class="card-img-top" alt="{{ content.title }}">
+                        {% else %}
+                            <div class="placeholder-image">
+                                {% if content.content_type == 'EBOOK' %}
+                                    <i class="fas fa-book fa-3x"></i>
+                                {% else %}
+                                    <i class="fas fa-headphones fa-3x"></i>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <span class="badge bg-primary position-absolute top-0 end-0 m-2">
+                            {{ content.get_content_type_display }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-break">{{ content.title }}</h5>
+                        <p class="card-text text-muted text-break">{{ content.author }}</p>
+                        <div class="mb-2 d-flex flex-wrap gap-1">
+                            <span class="badge bg-info">{{ content.get_file_format_display }}</span>
+                            <span class="badge bg-secondary">{{ content.language }}</span>
+                        </div>
+                        <p class="card-text small text-break">{{ content.description|truncatewords:30 }}</p>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                            <a href="{% url 'digital_library:content_detail' pk=content.pk %}" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                                <i class="fas fa-info-circle me-1"></i>Details
+                            </a>
+                            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                            <div class="btn-group w-100 w-sm-auto">
+                                <a href="{% url 'digital_library:content_edit' pk=content.pk %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'digital_library:content_delete' pk=content.pk %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 py-md-5">
+            <i class="fas fa-tablet-alt fa-3x text-muted mb-3"></i>
+            <p class="lead text-muted">No digital content available.</p>
+            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+            <a href="{% url 'digital_library:content_create' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-plus me-2"></i>Add Your First Digital Content
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.hover-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+}
+
+.placeholder-image {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    color: #adb5bd;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.8em;
+}
+
+.btn-group .btn {
+    margin: 0 2px;
+    border-radius: 4px !important;
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+@media (max-width: 576px) {
+    .card-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-group {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .btn-group .btn {
+        flex: 1;
+    }
+}
+
+@media (min-width: 577px) {
+    .content-card:nth-child(1) { animation-delay: 0.1s; }
+    .content-card:nth-child(2) { animation-delay: 0.2s; }
+    .content-card:nth-child(3) { animation-delay: 0.3s; }
+    .content-card:nth-child(4) { animation-delay: 0.4s; }
+    .content-card:nth-child(5) { animation-delay: 0.5s; }
+    .content-card:nth-child(6) { animation-delay: 0.6s; }
+}
+</style>
+{% endblock %}

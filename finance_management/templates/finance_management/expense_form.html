@@ -1,0 +1,188 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Expense{% else %}Create Expense{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                    <h6 class="m-0 mb-2 mb-sm-0 font-weight-bold text-primary">
+                        {% if form.instance.pk %}Edit Expense{% else %}Create New Expense{% endif %}
+                    </h6>
+                    <a href="{% url 'finance:expense_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Expense List
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Category -->
+                            <div class="col-12 col-sm-6 mb-3">
+                                {{ form.category|as_crispy_field }}
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="col-12 col-sm-6 mb-3">
+                                {{ form.amount|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Payment Method -->
+                            <div class="col-12 col-sm-6 mb-3">
+                                {{ form.payment_method|as_crispy_field }}
+                            </div>
+
+                            <!-- Paid To -->
+                            <div class="col-12 col-sm-6 mb-3">
+                                {{ form.paid_to|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Invoice Number -->
+                        <div class="mb-3">
+                            {{ form.invoice_number|as_crispy_field }}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            {{ form.description|as_crispy_field }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                {% if form.instance.pk %}Save Changes{% else %}Create Expense{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Expense Entry Tips -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Expense Entry Tips</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-sm-6 mb-4 mb-sm-0">
+                            <h6 class="font-weight-bold">Categories</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Staff Salary</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Maintenance</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Book Purchase</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Utilities</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Office Supplies</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Equipment</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Software/Digital Resources</li>
+                            </ul>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <h6 class="font-weight-bold">Payment Methods</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-money-bill text-success me-2"></i>Cash</li>
+                                <li><i class="fas fa-credit-card text-success me-2"></i>Card</li>
+                                <li><i class="fas fa-university text-success me-2"></i>Bank Transfer</li>
+                                <li><i class="fas fa-money-check text-success me-2"></i>Check</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Auto-format amount input
+    document.getElementById('id_amount').addEventListener('blur', function(e) {
+        if (this.value) {
+            this.value = parseFloat(this.value).toFixed(2);
+        }
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .list-unstyled li {
+        margin-bottom: 0.5rem;
+    }
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2653d4;
+    }
+    
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem;
+        }
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+        .form-control {
+            font-size: 0.9rem;
+        }
+        .list-unstyled {
+            font-size: 0.9rem;
+        }
+        h6 {
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,471 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Sidebar -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <!-- Sidebar Toggle Button for Mobile -->
+            <button class="btn btn-primary d-lg-none w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarContent">
+                <i class="fas fa-bars"></i> Toggle Menu
+            </button>
+
+            <!-- Sidebar Content -->
+            <div class="collapse d-lg-block" id="sidebarContent">
+                <div class="card">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#userManagementMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">User Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="userManagementMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if request.path == '/dashboard/' %}active{% endif %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                            <a href="{% url 'profile' %}" class="list-group-item list-group-item-action {% if request.path == '/profile/' %}active{% endif %}">
+                                <i class="fas fa-user me-2"></i>My Profile
+                            </a>
+                            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                            <a href="{% url 'manage_users' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-users me-2"></i>Manage Users
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Inventory Management Section -->
+                {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#inventoryMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Inventory Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="inventoryMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'inventory:inventory_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-boxes me-2"></i>View Inventory
+                            </a>
+                          
+                            <a href="{% url 'inventory:inventory_item_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus me-2"></i>Add Inventory Item
+                            </a>
+                            <a href="{% url 'inventory:inventory_list' %}?status=low" class="list-group-item list-group-item-action">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Low Stock Items
+                            </a>
+                            <a href="{% url 'inventory:inventory_list' %}?status=out" class="list-group-item list-group-item-action">
+                                <i class="fas fa-times-circle me-2"></i>Out of Stock
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#staffMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Staff Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="staffMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'staff:staff_dashboard' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-tachometer-alt me-2"></i>Staff Dashboard
+                            </a>
+                            <a href="{% url 'staff:department_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-building me-2"></i>Departments
+                            </a>
+                            <a href="{% url 'staff:staff_member_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-users me-2"></i>Staff Members
+                            </a>
+                            <a href="{% url 'staff:leave_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-calendar-alt me-2"></i>Leave Management
+                            </a>
+                            <a href="{% url 'staff:attendance_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-clock me-2"></i>Attendance
+                            </a>
+                            <a href="{% url 'staff:attendance_report' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-chart-bar me-2"></i>Attendance Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Membership Management section -->
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#membershipMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Membership Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="membershipMenu">
+                        <div class="list-group list-group-flush">
+                            {% if user.role == 'ADMIN' %}
+                            <a href="{% url 'membership:membership_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-id-card me-2"></i>All Memberships
+                            </a>
+                            <a href="{% url 'membership:membership_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-user-plus me-2"></i>Create Membership
+                            </a>
+                            <a href="{% url 'membership:membership_plan_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-list-alt me-2"></i>Membership Plans
+                            </a>
+                            <a href="{% url 'membership:membership_plan_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus-circle me-2"></i>Create Plan
+                            </a>
+                            
+                            <!-- Activity Management -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Activity Management</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'membership:activity_list' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-history me-2"></i>All Activities
+                            </a>
+                            {% if user_membership %}
+                            <a href="{% url 'membership:member_activities' membership_id=user_membership.id %}" 
+                               class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-user-clock me-2"></i>My Activities
+                            </a>
+                            {% endif %}
+                            
+                            <!-- Reminder Management -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Reminder Management</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'membership:renewal_reminders' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-bell me-2"></i>Renewal Reminders
+                                {% if pending_reminders_count %}
+                                <span class="badge bg-warning text-dark float-end">
+                                    {{ pending_reminders_count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                            <a href="{% url 'membership:reminder_create' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-plus me-2"></i>Create Reminder
+                            </a>
+                            {% endif %}
+                            
+                            <!-- Show this link to all users -->
+                            <a href="{% url 'membership:membership_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-user-circle me-2"></i>My Membership
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#bookCatalogMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Book Catalog</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="bookCatalogMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'book_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-book me-2"></i>View Books
+                            </a>
+                            <a href="{% url 'author_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-user-edit me-2"></i>View Authors
+                            </a>
+                            <a href="{% url 'genre_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-tags me-2"></i>View Genres
+                            </a>
+                            <a href="{% url 'shelf_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-bookmark me-2"></i>View Shelves
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#digitalLibraryMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Digital Library</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="digitalLibraryMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'digital_library:content_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-tablet-alt me-2"></i>Browse Digital Content
+                            </a>
+                            <a href="{% url 'digital_library:my_loans' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-book-reader me-2"></i>My Digital Loans
+                            </a>
+                            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                            <a href="{% url 'digital_library:content_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus me-2"></i>Add Digital Content
+                            </a>
+                            {% endif %}
+                            
+                            <!-- Digital Content Types -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Content Types</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'digital_library:content_list' %}?content_type=EBOOK" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-file-pdf me-2"></i>eBooks
+                            </a>
+                            <a href="{% url 'digital_library:content_list' %}?content_type=AUDIOBOOK" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-headphones me-2"></i>Audiobooks
+                            </a>
+                            
+                            <!-- Progress Tracking -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">My Progress</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'digital_library:content_list' %}?status=in_progress" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-clock me-2"></i>In Progress
+                            </a>
+                            <a href="{% url 'digital_library:content_list' %}?status=completed" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-check-circle me-2"></i>Completed
+                            </a>
+                            <a href="{% url 'digital_library:content_list' %}?status=bookmarked" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-bookmark me-2"></i>Bookmarked
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#eventMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Event Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="eventMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'event:event_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-calendar-alt me-2"></i>View Events
+                            </a>
+                            <a href="{% url 'event:event_calendar' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-calendar-week me-2"></i>Event Calendar
+                            </a>
+                            <a href="{% url 'event:my_registrations' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-ticket-alt me-2"></i>My Registrations
+                            </a>
+                            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                            <a href="{% url 'event:event_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus me-2"></i>Create Event
+                            </a>
+                            <a href="{% url 'event:event_register' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-user-plus me-2"></i>Create Registration
+                            </a>
+                            
+                            <!-- Event Categories -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Event Categories</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'event:event_list' %}?event_type=BOOK_LAUNCH" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-book me-2"></i>Book Launches
+                            </a>
+                            <a href="{% url 'event:event_list' %}?event_type=READING_CLUB" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-users me-2"></i>Reading Clubs
+                            </a>
+                            <a href="{% url 'event:event_list' %}?event_type=WORKSHOP" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Workshops
+                            </a>
+                            <a href="{% url 'event:event_list' %}?event_type=AUTHOR_VISIT" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-user-edit me-2"></i>Author Visits
+                            </a>
+                            <a href="{% url 'event:event_list' %}?event_type=CHILDREN_EVENT" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-child me-2"></i>Children's Events
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#circulationMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Circulation Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="circulationMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'circulation:user_loans' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-book-reader me-2"></i>My Loans & Holds
+                            </a>
+                            {% if user.role == 'LIBRARIAN' or user.role == 'ADMIN' %}
+                            <a href="{% url 'circulation:loan_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus me-2"></i>Create Loan
+                            </a>
+                            <a href="{% url 'circulation:loan_list' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-list me-2"></i>Manage Loans
+                            </a>
+                            <a href="{% url 'circulation:all_loans' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-clipboard-list me-2"></i>All Loans
+                            </a>
+                            <a href="{% url 'circulation:overdue_books' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-clock me-2"></i>Overdue Books
+                            </a>
+                            <a href="{% url 'circulation:manage_fines' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-money-bill-wave me-2"></i>Manage Fines
+                            </a>
+                            <a href="{% url 'circulation:fine_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus me-2"></i>Create Fine
+                            </a>
+                            <a href="{% url 'circulation:bookhold_create' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-plus me-2"></i>Create Book Hold
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                <div class="card mt-3">
+                    <div class="card-header section-header" data-bs-toggle="collapse" data-bs-target="#financialMenu" aria-expanded="true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Financial Management</h5>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="financialMenu">
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'finance:dashboard' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-chart-line me-2"></i>Financial Dashboard
+                            </a>
+                            
+                            <!-- Transaction Management -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Transaction Management</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'finance:transaction_list' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-exchange-alt me-2"></i>View Transactions
+                            </a>
+                            <a href="{% url 'finance:transaction_create' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-plus me-2"></i>Create Transaction
+                            </a>
+                            
+                            <!-- Income Management -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Income Management</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'finance:income_list' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-plus-circle me-2"></i>View Income
+                            </a>
+                            <a href="{% url 'finance:income_create' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-plus me-2"></i>Create Income
+                            </a>
+
+                            <!-- Expense Management -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Expense Management</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'finance:expense_list' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-minus-circle me-2"></i>View Expenses
+                            </a>
+                            <a href="{% url 'finance:expense_create' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-minus me-2"></i>Create Expense
+                            </a>
+                            
+                            <!-- Fine Management -->
+                            <!-- <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Fine Management</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'finance:fine_list' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-exclamation-circle me-2"></i>View Fines
+                            </a>
+                            <a href="{% url 'finance:fine_collection' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-hand-holding-usd me-2"></i>Collect Fines
+                            </a> -->
+                            
+                            <!-- Reports -->
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Financial Reports</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'finance:income_report' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-chart-bar me-2"></i>Income Report
+                            </a>
+                            <a href="{% url 'finance:expense_report' %}" class="list-group-item list-group-item-action ps-4">
+                                <i class="fas fa-chart-pie me-2"></i>Expense Report
+                            </a>
+                            <a href="{% url 'finance:generate_report' %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-file-export me-2"></i>Generate Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Welcome, {{ user.username }}!</h2>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Your Information</h5>
+                    <div class="table-responsive">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-sm-4 fw-bold">Username:</div>
+                                    <div class="col-sm-8">{{ user.username }}</div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-sm-4 fw-bold">Role:</div>
+                                    <div class="col-sm-8">{{ user.role }}</div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-sm-4 fw-bold">Email:</div>
+                                    <div class="col-sm-8">{{ user.email }}</div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-sm-4 fw-bold">Library Card:</div>
+                                    <div class="col-sm-8">{{ user.profile.library_card_number }}</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

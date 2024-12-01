@@ -1,0 +1,145 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}{{ action }} Reminder{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'membership:renewal_reminders' %}" class="text-decoration-none">
+                    <i class="fas fa-bell me-2"></i>Renewal Reminders
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ action }} Reminder</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas {% if action == 'Create' %}fa-plus-circle{% else %}fa-edit{% endif %} me-2"></i>
+                        {{ action }} Reminder
+                    </h3>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Membership Selection -->
+                        <div class="mb-4">
+                            <label for="{{ form.membership.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Member
+                            </label>
+                            {{ form.membership }}
+                            {% if form.membership.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.membership.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Reminder Date -->
+                        <div class="mb-4">
+                            <label for="{{ form.reminder_date.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-calendar-alt me-2"></i>Reminder Date
+                            </label>
+                            {{ form.reminder_date }}
+                            {% if form.reminder_date.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.reminder_date.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                Select when the reminder should be sent
+                            </div>
+                        </div>
+
+                        <!-- Response Status -->
+                        <div class="mb-4">
+                            <label for="{{ form.response.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-reply me-2"></i>Response Status
+                            </label>
+                            {{ form.response }}
+                            {% if form.response.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.response.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="{% url 'membership:renewal_reminders' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Reminders
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas {% if action == 'Create' %}fa-plus{% else %}fa-save{% endif %} me-2"></i>
+                                {{ action }} Reminder
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if action == 'Create' %}
+            <!-- Help Card -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Reminder Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Select Member:</strong> Choose the member who needs a renewal reminder
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Set Date:</strong> Choose a date before the membership expires
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Status:</strong> Initially set as 'Pending' until member responds
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Add Bootstrap form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,220 @@
+{% extends 'user_management/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Back to List Button -->
+    <div class="mb-3">
+        <a href="{% url 'book_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Book Details Card -->
+        <div class="col-12 col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                        <h2 class="h4 mb-0">{{ book.title }}</h2>
+                        <div class="d-flex gap-2">
+                            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                            <a href="{% url 'book_edit' pk=book.pk %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'book_pdf' pk=book.pk %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Basic Information -->
+                    <div class="mb-4">
+                        <h3 class="h5 text-primary">Basic Information</h3>
+                        <div class="row gy-2">
+                            <div class="col-12 col-sm-6">
+                                <p class="mb-2"><strong>ISBN:</strong> {{ book.isbn }}</p>
+                                <p class="mb-2"><strong>Language:</strong> {{ book.get_language_display }}</p>
+                                <p class="mb-2"><strong>Publication Date:</strong> {{ book.publication_date }}</p>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <p class="mb-2">
+                                    <strong>Authors:</strong>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        {% for author in book.authors.all %}
+                                        <a href="{% url 'author_detail' pk=author.pk %}" class="badge bg-info text-decoration-none">
+                                            {{ author.name }}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Genres:</strong>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        {% for genre in book.genres.all %}
+                                        <span class="badge bg-secondary">{{ genre.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Status -->
+                    <div class="mb-4">
+                        <h3 class="h5 text-primary">Availability</h3>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <span class="badge {% if book.availability_status == 'AVAILABLE' %}bg-success
+                                             {% elif book.availability_status == 'ISSUED' %}bg-warning
+                                             {% elif book.availability_status == 'RESERVED' %}bg-info
+                                             {% else %}bg-secondary{% endif %}">
+                                {{ book.get_availability_status_display }}
+                            </span>
+                            {% if user.role == 'ADMIN' or user.role == 'LIBRARIAN' %}
+                            <a href="{% url 'update_book_availability' pk=book.pk %}" class="btn btn-sm btn-outline-primary">
+                                Update Status
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% if book.availability_notes %}
+                        <div class="alert alert-info">
+                            {{ book.availability_notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Location Information -->
+                    {% if book.location %}
+                    <div class="mb-4">
+                        <h3 class="h5 text-primary">Location</h3>
+                        <p>
+                            Floor {{ book.location.shelf.floor }},
+                            Section {{ book.location.shelf.section }},
+                            Shelf {{ book.location.shelf.name }},
+                            Row {{ book.location.row }},
+                            Column {{ book.location.column }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Summary -->
+                    {% if book.summary %}
+                    <div class="mb-4">
+                        <h3 class="h5 text-primary">Summary</h3>
+                        <p class="text-justify">{{ book.summary }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Card -->
+        <div class="col-12 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="h4 mb-0">Reviews</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Average Rating -->
+                    {% if average_rating %}
+                    <div class="text-center mb-4">
+                        <h4 class="h5">Average Rating</h4>
+                        <div class="display-4 text-warning">
+                            {{ average_rating|floatformat:1 }}
+                            <small class="text-muted fs-6">/ 5</small>
+                        </div>
+                        <div class="text-muted">
+                            Based on {{ book.reviews.count }} review{{ book.reviews.count|pluralize }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- User's Review Form -->
+                    {% if user.is_authenticated %}
+                    <div class="mb-4">
+                        <h4 class="h5">Your Review</h4>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ review_form|crispy }}
+                            <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
+                                {% if user_review %}
+                                <button type="submit" name="delete_review" class="btn btn-danger btn-sm">
+                                    Delete Review
+                                </button>
+                                {% endif %}
+                                <button type="submit" name="review_submit" class="btn btn-primary btn-sm">
+                                    {% if user_review %}Update{% else %}Submit{% endif %} Review
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- Other Reviews -->
+                    <div>
+                        <h4 class="h5">Other Reviews</h4>
+                        {% if other_reviews %}
+                        <div class="reviews-list">
+                            {% for review in other_reviews %}
+                            <div class="review-item mb-3 p-3 border rounded">
+                                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-2">
+                                    <span class="fw-bold">{{ review.user.get_full_name|default:review.user.username }}</span>
+                                    <div class="text-warning">
+                                        {% for i in "12345"|make_list %}
+                                        <i class="fas fa-star{% if forloop.counter > review.rating %}-o{% endif %}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="mb-1">{{ review.comment }}</p>
+                                <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No reviews yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.reviews-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.review-item {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s;
+}
+
+.review-item:hover {
+    background-color: #fff;
+}
+
+.fa-star {
+    color: #ffc107;
+}
+
+.fa-star-o {
+    color: #dee2e6;
+}
+
+@media (max-width: 576px) {
+    .card-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'user_management/base.html' %}
+{% load static %}
+
+{% block title %}Delete Expense{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                    <h6 class="m-0 mb-2 mb-sm-0 font-weight-bold text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Delete Expense Record
+                    </h6>
+                    <a href="{% url 'finance:expense_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Expense List
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">Warning!</h5>
+                        <p>Are you sure you want to delete this expense record? This action cannot be undone.</p>
+                    </div>
+
+                    <!-- Expense Details -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-3 text-muted">Expense Details</h6>
+                            <div class="table-responsive">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4 col-lg-3">Expense ID:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.expense_id }}</dd>
+
+                                    <dt class="col-sm-4 col-lg-3">Date:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.date|date:"Y-m-d H:i" }}</dd>
+
+                                    <dt class="col-sm-4 col-lg-3">Category:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.get_category_display }}</dd>
+
+                                    <dt class="col-sm-4 col-lg-3">Amount:</dt>
+                                    <dd class="col-sm-8 col-lg-9">${{ object.amount|floatformat:2 }}</dd>
+
+                                    <dt class="col-sm-4 col-lg-3">Paid To:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.paid_to }}</dd>
+
+                                    <dt class="col-sm-4 col-lg-3">Payment Method:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.get_payment_method_display }}</dd>
+
+                                    <dt class="col-sm-4 col-lg-3">Description:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.description }}</dd>
+
+                                    {% if object.invoice_number %}
+                                    <dt class="col-sm-4 col-lg-3">Invoice:</dt>
+                                    <dd class="col-sm-8 col-lg-9">{{ object.invoice_number }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-sm-flex">
+                            <button type="submit" class="btn btn-danger flex-grow-1">
+                                <i class="fas fa-trash me-2"></i>Delete Expense Record
+                            </button>
+                            <a href="{% url 'finance:expense_list' %}" class="btn btn-secondary flex-grow-1">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    dl.row {
+        margin-bottom: 0;
+    }
+    dt {
+        font-weight: 600;
+        color: #4e73df;
+    }
+    dd {
+        margin-bottom: 0.5rem;
+        word-break: break-word;
+    }
+    .alert-danger {
+        background-color: #fff3f3;
+        border-color: #f8d7da;
+    }
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem;
+        }
+        dt, dd {
+            font-size: 0.9rem;
+        }
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}
