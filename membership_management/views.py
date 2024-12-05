@@ -218,4 +218,13 @@ def reminder_delete(request, pk):
     if request.method == 'POST':
         reminder.delete()
         messages.success(request, 'Reminder deleted successfully.')
-    return redirect('membership:renewal_reminders') 
+    return redirect('membership:renewal_reminders')
+
+@login_required
+@user_passes_test(is_admin)
+def membership_delete(request, pk):
+    membership = get_object_or_404(Membership, pk=pk)
+    if request.method == 'POST':
+        membership.delete()
+        messages.success(request, 'Membership deleted successfully.')
+    return redirect('membership:membership_list') 

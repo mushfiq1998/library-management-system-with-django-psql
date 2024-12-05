@@ -9,6 +9,7 @@ urlpatterns = [
     path('memberships/create/', views.membership_create, name='membership_create'),
     path('memberships/<int:pk>/edit/', views.membership_edit, name='membership_edit'),
     path('memberships/<int:membership_id>/activities/', views.member_activities, name='member_activities'),
+    path('memberships/<int:pk>/delete/', views.membership_delete, name='membership_delete'),
     
     # Membership Plan URLs
     path('plans/', views.membership_plan_list, name='membership_plan_list'),
