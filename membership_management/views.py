@@ -21,7 +21,7 @@ def membership_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Membership created successfully.')
-            return redirect('membership_list')
+            return redirect('membership:membership_list')
     else:
         form = MembershipForm()
     return render(request, 'membership_management/membership_form.html', {'form': form, 'action': 'Create'})
@@ -35,7 +35,7 @@ def membership_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Membership updated successfully.')
-            return redirect('membership_list')
+            return redirect('membership:membership_list')
     else:
         form = MembershipForm(instance=membership)
     return render(request, 'membership_management/membership_form.html', {'form': form, 'action': 'Edit'})
