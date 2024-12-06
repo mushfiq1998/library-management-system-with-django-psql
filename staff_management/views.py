@@ -281,12 +281,21 @@ def leave_delete(request, pk):
 @login_required
 @user_passes_test(is_admin_or_librarian)
 def attendance_list(request):
-    date = request.GET.get('date', timezone.now().date())
-    attendance = Attendance.objects.filter(date=date)
+    show_all = request.GET.get('show_all', False)
+    date = request.GET.get('date')
+    
+    if show_all:
+        attendance = Attendance.objects.all().order_by('-date')
+    elif date:
+        attendance = Attendance.objects.filter(date=date)
+    else:
+        attendance = Attendance.objects.filter(date=timezone.now().date())
+    
     return render(request, 'staff_management/attendance_list.html', {
         'attendance': attendance,
         'selected_date': date,
-        'today': timezone.now().date()
+        'today': timezone.now().date(),
+        'show_all': show_all
     })
 
 @login_required

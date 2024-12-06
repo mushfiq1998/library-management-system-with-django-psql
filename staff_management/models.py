@@ -42,15 +42,15 @@ class StaffMember(models.Model):
             )
         ]
     )
-    designation = models.CharField(max_length=100)
+    designation = models.CharField(max_length=100, null=True, blank=True)
     employment_status = models.CharField(
         max_length=20,
         choices=EMPLOYMENT_STATUS,
         default='FULL_TIME'
     )
-    joining_date = models.DateField()
+    joining_date = models.DateField(null=True, blank=True)
     phone_number = models.CharField(
-        max_length=15,
+        null=True, blank=True, max_length=15,
         validators=[
             RegexValidator(
                 regex=r'^\+?1?\d{9,15}$',
@@ -59,7 +59,7 @@ class StaffMember(models.Model):
         ]
     )
     emergency_contact = models.CharField(
-        max_length=15,
+        null=True, blank=True, max_length=15,
         validators=[
             RegexValidator(
                 regex=r'^\+?1?\d{9,15}$',
@@ -67,7 +67,7 @@ class StaffMember(models.Model):
             )
         ]
     )
-    address = models.TextField()
+    address = models.TextField(null=True, blank=True)
     salary = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -112,10 +112,11 @@ class Leave(models.Model):
         on_delete=models.CASCADE,
         related_name='leaves'
     )
-    leave_type = models.CharField(max_length=20, choices=LEAVE_TYPE)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    reason = models.TextField()
+    leave_type = models.CharField(
+        max_length=20, choices=LEAVE_TYPE, null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
         choices=STATUS,
@@ -145,8 +146,8 @@ class Attendance(models.Model):
         on_delete=models.CASCADE,
         related_name='attendance'
     )
-    date = models.DateField()
-    check_in = models.TimeField()
+    date = models.DateField(null=True, blank=True)
+    check_in = models.TimeField(null=True, blank=True)
     check_out = models.TimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
@@ -158,7 +159,7 @@ class Attendance(models.Model):
         ],
         default='PRESENT'
     )
-    notes = models.TextField(blank=True)
+    notes = models.TextField(blank=True, null=True)
 
     class Meta:
         unique_together = ['staff_member', 'date']
