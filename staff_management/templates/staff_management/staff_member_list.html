@@ -29,30 +29,38 @@
         {% endif %}
 
         <!-- Search and Filter Form -->
-        <div class="row g-3 mb-4">
+        <div class="row mb-4">
             <div class="col-12">
-                <form method="get" class="d-flex flex-column flex-md-row gap-3">
+                <form method="get" class="d-flex flex-wrap gap-2">
                     <div class="flex-grow-1">
-                        <div class="input-group">
-                            <input type="text" 
-                                   name="search" 
-                                   class="form-control" 
-                                   placeholder="Search by name or employee ID..."
-                                   value="{{ search_query }}">
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-search"></i><span class="d-none d-md-inline ms-2">Search</span>
-                            </button>
-                        </div>
+                        <input type="text" 
+                               name="search" 
+                               class="form-control" 
+                               placeholder="Search by name or employee ID"
+                               value="{{ search_query }}">
                     </div>
-                    <div class="flex-shrink-0">
-                        <select name="department" class="form-select" onchange="this.form.submit()">
+                    <div class="flex-grow-1">
+                        <select name="department" class="form-select">
                             <option value="">All Departments</option>
                             {% for dept in departments %}
-                                <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ dept.name }}
-                                </option>
+                            <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                        {% if request.GET.search or request.GET.department %}
+                        <a href="{% url 'staff:staff_member_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Clear
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'staff:staff_member_list' %}?show_all=true" class="btn btn-info text-white">
+                            <i class="fas fa-list me-2"></i>Show All
+                        </a>
                     </div>
                 </form>
             </div>
@@ -120,12 +128,12 @@
                 </table>
             </div>
         {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                <p class="lead text-muted">No staff members found.</p>
-                <a href="{% url 'staff:staff_member_create' %}" class="btn btn-primary">
-                    <i class="fas fa-user-plus me-2"></i>Add Staff Member
-                </a>
+            <div class="alert alert-info">
+                {% if search_query or selected_department %}
+                    No staff members found matching your search criteria.
+                {% else %}
+                    No staff members found.
+                {% endif %}
             </div>
         {% endif %}
     </div>

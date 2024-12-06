@@ -88,24 +88,36 @@ def department_delete(request, pk):
 def staff_member_list(request):
     query = request.GET.get('search', '')
     department = request.GET.get('department', '')
+    show_all = request.GET.get('show_all', False)
     
-    staff_members = StaffMember.objects.all()
-    
-    if query:
-        staff_members = staff_members.filter(
-            Q(user__first_name__icontains=query) |
-            Q(user__last_name__icontains=query) |
-            Q(employee_id__icontains=query)
-        )
-    
-    if department:
-        staff_members = staff_members.filter(department_id=department)
+    if show_all:
+        staff_members = StaffMember.objects.all()
+    else:
+        staff_members = StaffMember.objects.all()
+        if query:
+            # Split the search query into words to search first and last name separately
+            search_terms = query.split()
+            name_query = Q()
+            
+            # Add employee ID search
+            name_query |= Q(employee_id__icontains=query)
+            
+            # Search in both first and last name for each term
+            for term in search_terms:
+                name_query |= Q(user__first_name__icontains=term)
+                name_query |= Q(user__last_name__icontains=term)
+                
+            staff_members = staff_members.filter(name_query)
+            
+        if department:
+            staff_members = staff_members.filter(department_id=department)
     
     context = {
-        'staff_members': staff_members,
+        'staff_members': staff_members.order_by('user__first_name', 'user__last_name'),
         'departments': Department.objects.all(),
         'search_query': query,
-        'selected_department': department
+        'selected_department': department,
+        'show_all': show_all
     }
     return render(request, 'staff_management/staff_member_list.html', context)
 
