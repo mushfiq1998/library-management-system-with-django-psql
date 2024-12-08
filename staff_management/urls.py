@@ -16,6 +16,7 @@ urlpatterns = [
     path('members/<int:pk>/', views.staff_member_detail, name='staff_member_detail'),
     path('members/<int:pk>/edit/', views.staff_member_edit, name='staff_member_edit'),
     path('members/<int:pk>/delete/', views.staff_member_delete, name='staff_member_delete'),
+    path('members/<int:pk>/update-role/', views.update_staff_role, name='update_staff_role'),
     
     # Leave Management URLs
     path('leaves/', views.leave_list, name='leave_list'),

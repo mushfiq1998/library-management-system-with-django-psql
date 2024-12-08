@@ -148,7 +148,8 @@ def staff_member_detail(request, pk):
     context = {
         'staff_member': staff_member,
         'recent_leaves': leaves,
-        'recent_attendance': attendance
+        'recent_attendance': attendance,
+        'user_role': staff_member.user.role
     }
     return render(request, 'staff_management/staff_member_detail.html', context)
 
@@ -195,26 +196,41 @@ def leave_list(request):
 
 @login_required
 def leave_create(request):
+    # Add debugging messages
+    messages.info(request, f"Current user role: {request.user.role}")
+    
     try:
-        staff_member = request.user.staff_profile
-    except StaffMember.DoesNotExist:
-        messages.error(request, 'You must be a staff member to request leave.')
-        return redirect('dashboard')
+        staff_profile = request.user.staff_profile
+        messages.info(request, f"Staff profile found: {staff_profile.employee_id}")
+    except (AttributeError, StaffMember.DoesNotExist):
+        messages.error(request, 'Staff profile not found. Please contact an administrator.')
+        return redirect('staff:leave_list')
+
+    # Check if user is a staff member
+    if request.user.role != 'STAFF':
+        messages.error(request, f'You must be a staff member to request leave. Current role: {request.user.role}')
+        return redirect('staff:leave_list')
 
     if request.method == 'POST':
         form = LeaveForm(request.POST)
         if form.is_valid():
             leave = form.save(commit=False)
-            leave.staff_member = staff_member
+            leave.staff_member = staff_profile
             leave.save()
             messages.success(request, 'Leave request submitted successfully.')
             return redirect('staff:leave_list')
     else:
-        form = LeaveForm()
-    
+        initial_data = {'staff_member': staff_profile}
+        form = LeaveForm(initial=initial_data)
+        
+        if 'staff_member' in form.fields:
+            form.fields['staff_member'].widget = forms.HiddenInput()
+            form.fields['staff_member'].initial = staff_profile
+
     return render(request, 'staff_management/leave_form.html', {
         'form': form,
-        'action': 'Create'
+        'action': 'Create',
+        'staff_member': staff_profile
     })
 
 @login_required
@@ -392,4 +408,13 @@ def attendance_delete(request, pk):
     
     return render(request, 'staff_management/attendance_confirm_delete.html', {
         'attendance': attendance
-    }) 
+    })
+
+@login_required
+@user_passes_test(is_admin_or_librarian)
+def update_staff_role(request, pk):
+    staff_member = get_object_or_404(StaffMember, pk=pk)
+    staff_member.user.role = 'STAFF'
+    staff_member.user.save()
+    messages.success(request, f'Updated role for {staff_member.user.get_full_name()} to STAFF')
+    return redirect('staff:staff_member_list') 

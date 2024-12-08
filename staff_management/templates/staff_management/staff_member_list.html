@@ -120,6 +120,11 @@
                                            title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>
+                                        <a href="{% url 'staff:update_staff_role' pk=staff.pk %}" 
+                                           class="btn btn-sm btn-secondary" 
+                                           title="Update Role">
+                                            <i class="fas fa-sync"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

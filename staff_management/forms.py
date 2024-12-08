@@ -71,6 +71,7 @@ class StaffMemberForm(forms.ModelForm):
             user.first_name = self.cleaned_data['first_name']
             user.last_name = self.cleaned_data['last_name']
             user.email = email
+            user.role = 'STAFF'
             user.save()
         else:
             # Try to get existing user or create new one
@@ -78,6 +79,8 @@ class StaffMemberForm(forms.ModelForm):
                 user = User.objects.get(email=email)
                 if hasattr(user, 'staff_profile'):
                     raise forms.ValidationError("This user already has a staff profile.")
+                user.role = 'STAFF'
+                user.save()
             except User.DoesNotExist:
                 # Create new user with unique username
                 base_username = email.split('@')[0]
@@ -111,20 +114,27 @@ class LeaveForm(forms.ModelForm):
         model = Leave
         fields = ['leave_type', 'start_date', 'end_date', 'reason']
         widgets = {
-            'leave_type': forms.Select(attrs={'class': 'form-select'}),
+            'leave_type': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
             'start_date': forms.DateInput(attrs={
                 'type': 'date',
-                'class': 'form-control'
+                'class': 'form-control',
+                'required': True,
+                'min': timezone.now().date().isoformat()
             }),
             'end_date': forms.DateInput(attrs={
                 'type': 'date',
-                'class': 'form-control'
+                'class': 'form-control',
+                'required': True
             }),
             'reason': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Please provide a detailed reason for your leave request'
-            }),
+                'placeholder': 'Please provide a detailed reason for your leave request',
+                'required': True
+            })
         }
 
     def clean(self):
@@ -133,12 +143,18 @@ class LeaveForm(forms.ModelForm):
         end_date = cleaned_data.get('end_date')
         
         if start_date and end_date:
+            # Check if end date is before start date
             if end_date < start_date:
                 raise forms.ValidationError("End date cannot be before start date")
             
             # Check if dates are in the past
             if start_date < timezone.now().date():
                 raise forms.ValidationError("Start date cannot be in the past")
+            
+            # Check if leave duration is reasonable (optional)
+            duration = (end_date - start_date).days + 1
+            if duration > 30:  # Example: max 30 days leave
+                raise forms.ValidationError("Leave duration cannot exceed 30 days")
         
         return cleaned_data
 
